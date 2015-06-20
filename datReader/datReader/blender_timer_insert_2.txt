@@ -1,0 +1,42 @@
+import bpy
+import os
+import time
+
+verts = []
+faces = []
+
+meshfile=open('c:/tmp/mesh69.txt', 'r')
+numFace = int(meshfile.readline())
+for j in range(numFace):
+    arr = meshfile.readline().strip().split(',')
+    iarr = []
+    for ele in arr:
+        iarr.append(int(ele))
+        
+    face = tuple(iarr)
+    faces.append(face)
+
+numVert = int(meshfile.readline())
+for i in range(numVert):
+    arr = meshfile.readline().strip().split(',')
+    farr = []
+    for ele in arr:
+        farr.append(float(ele))
+        
+    vert = tuple(farr)
+    verts.append(vert)
+
+for i in range(3):
+    print(i)
+    mesh = bpy.data.meshes.new(str(i))
+    object = bpy.data.objects.new(str(i),mesh)
+        
+    object.location = bpy.context.scene.cursor_location
+    bpy.context.scene.objects.link(object)
+        
+    mesh.from_pydata(verts, [], faces)
+    mesh.update(calc_edges=True)
+    
+    time.sleep(5)
+    verts.pop(0)
+ 

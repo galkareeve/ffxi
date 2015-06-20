@@ -1,0 +1,76 @@
+import threading
+import time
+import bpy
+import os
+
+verts = []
+faces = []
+
+meshfile=open('c:/tmp/mesh69.txt', 'r')
+numFace = int(meshfile.readline())
+for j in range(numFace):
+    arr = meshfile.readline().strip().split(',')
+    iarr = []
+    for ele in arr:
+        iarr.append(int(ele))
+        
+    face = tuple(iarr)
+    faces.append(face)
+
+numVert = int(meshfile.readline())
+for i in range(numVert):
+    arr = meshfile.readline().strip().split(',')
+    farr = []
+    for ele in arr:
+        farr.append(float(ele))
+        
+    vert = tuple(farr)
+    verts.append(vert)
+ 
+mesh = bpy.data.meshes.new("myMeshName")
+object = bpy.data.objects.new("myObjName",mesh)
+    
+object.location = bpy.context.scene.cursor_location
+bpy.context.scene.objects.link(object)
+    
+mesh.from_pydata(verts, [], faces)
+mesh.update(calc_edges=True)
+           
+#unselect everything
+# <insert code here, this can vary depending on your situation>
+# bpy.ops.object.select_all()
+ 
+def myFunc():
+    # gather list of items of interest.
+    #candidate_list = [item.name for item in bpy.data.objects if item.type == "MESH"]
+ 
+    # select them only.
+    #for object_name in candidate_list:
+    #    bpy.data.objects[object_name].select = True
+     
+    # remove all selected.
+    bpy.data.objects['myObjName'].select=True
+    bpy.ops.object.delete()
+
+    #remove the meshes, they have no users anymore.
+    for item in bpy.data.meshes:
+        bpy.data.meshes.remove(item)
+
+    verts.pop(0)
+    mesh = bpy.data.meshes.new("myMeshName")
+    object = bpy.data.objects.new("myObjName",mesh)
+    
+    object.location = bpy.context.scene.cursor_location
+    bpy.context.scene.objects.link(object)
+    
+    mesh.from_pydata(verts, [], faces)
+    mesh.update(calc_edges=True)
+    
+    
+def keepalive():
+    for i in range(45):
+        print (i)
+        time.sleep(5)
+        myFunc()
+        
+threading.Thread(target=keepalive).start()
