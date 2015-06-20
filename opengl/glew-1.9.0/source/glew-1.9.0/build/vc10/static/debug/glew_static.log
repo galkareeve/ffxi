@@ -1,0 +1,21 @@
+﻿Build started 6/13/2013 10:05:22 AM.
+     1>Project "C:\opengl\glew-1.9.0\source\glew-1.9.0\build\vc10\glew_static.vcxproj" on node 2 (rebuild target(s)).
+     1>InitializeBuildStatus:
+         Creating "static/debug/glew_static.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         C:\Program Files\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I../../include /Zi /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _LIB /D WIN32_LEAN_AND_MEAN /D VC_EXTRALEAN /D GLEW_STATIC /D _VC80_UPGRADE=0x0600 /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /Gy- /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\static/debug\\" /Fd".\static/debug\vc100.pdb" /Gd /TC /analyze- /errorReport:prompt ..\..\src\glew.c
+         glew.c
+       ResourceCompile:
+         C:\Program Files\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /D _DEBUG /D GLEW_STATIC /D _VC80_UPGRADE=0x0600 /l"0x0409" /nologo /fo"static/debug/glew.res" ..\glew.rc 
+       Lib:
+         C:\Program Files\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"../../lib/glew32sd.lib" /NOLOGO /MACHINE:X86 static/debug/glew.res
+         .\static/debug\glew.obj
+         glew_static.vcxproj -> C:\opengl\glew-1.9.0\source\glew-1.9.0\build\vc10\../../lib/glew32sd.lib
+       FinalizeBuildStatus:
+         Deleting file "static/debug/glew_static.unsuccessfulbuild".
+         Touching "static/debug/glew_static.lastbuildstate".
+     1>Done Building Project "C:\opengl\glew-1.9.0\source\glew-1.9.0\build\vc10\glew_static.vcxproj" (rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:01.17
