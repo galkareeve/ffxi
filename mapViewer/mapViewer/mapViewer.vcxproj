@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{07C8B18D-2ADE-4243-A98D-78B949065B15}</ProjectGuid>
+    <RootNamespace>mapViewer</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>C:\opengl\glmath\glm-9.6.1;C:\opengl\glfw-3\include\GLFW;C:\opengl\glew-1.11.0\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LibraryPath>C:\opengl\glfw-3\lib-vc2010;C:\opengl\glew-1.11.0\lib\Release\Win32;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="CSceneNodeAnimatorFlyCircle.cpp" />
+    <ClCompile Include="CSceneNodeAnimatorFlyStraight.cpp" />
+    <ClCompile Include="CSceneNodeAnimatorRotation.cpp" />
+    <ClCompile Include="DDS2Bmp.cpp" />
+    <ClCompile Include="FFXILandscapeMesh.cpp" />
+    <ClCompile Include="FFXIMesh.cpp" />
+    <ClCompile Include="FFXI_Character.cpp" />
+    <ClCompile Include="FPS_Counter.cpp" />
+    <ClCompile Include="Frustum.cpp" />
+    <ClCompile Include="IMesh.cpp" />
+    <ClCompile Include="IMeshBuffer.cpp" />
+    <ClCompile Include="MeshBufferGroup.cpp" />
+    <ClCompile Include="Octree.cpp" />
+    <ClCompile Include="OpenGLDriver.cpp" />
+    <ClCompile Include="Plane.cpp" />
+    <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="SceneNode.cpp" />
+    <ClCompile Include="SceneNodeLandscape.cpp" />
+    <ClCompile Include="shader.cpp" />
+    <ClCompile Include="texture.cpp" />
+    <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="tutorial08.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CSceneNodeAnimatorFlyCircle.h" />
+    <ClInclude Include="CSceneNodeAnimatorFlyStraight.h" />
+    <ClInclude Include="CSceneNodeAnimatorRotation.h" />
+    <ClInclude Include="DDS2Bmp.h" />
+    <ClInclude Include="FFXILandscapeMesh.h" />
+    <ClInclude Include="FFXIMesh.h" />
+    <ClInclude Include="FFXI_Character.h" />
+    <ClInclude Include="FPS_Counter.h" />
+    <ClInclude Include="Frustum.h" />
+    <ClInclude Include="IDriver.h" />
+    <ClInclude Include="IMesh.h" />
+    <ClInclude Include="IMeshBuffer.h" />
+    <ClInclude Include="IReferenceCounted.h" />
+    <ClInclude Include="ISceneNode.h" />
+    <ClInclude Include="ISceneNodeAnimator.h" />
+    <ClInclude Include="ISceneNodeAnimatorFinishing.h" />
+    <ClInclude Include="MeshBufferGroup.h" />
+    <ClInclude Include="myEnum.h" />
+    <ClInclude Include="Octree.h" />
+    <ClInclude Include="OpenGLDriver.h" />
+    <ClInclude Include="Plane.h" />
+    <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="SceneNode.h" />
+    <ClInclude Include="SceneNodeLandscape.h" />
+    <ClInclude Include="shader.hpp" />
+    <ClInclude Include="TDWAnalysis.h" />
+    <ClInclude Include="texture.hpp" />
+    <ClInclude Include="Timer.h" />
+    <ClInclude Include="Utility.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
