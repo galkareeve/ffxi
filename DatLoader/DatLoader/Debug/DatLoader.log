@@ -1,0 +1,21 @@
+﻿Build started 6/20/2015 7:08:54 PM.
+     1>Project "D:\c_project\irrlichit\DatLoader\DatLoader\DatLoader.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Debug\DatLoader.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         All outputs are up-to-date.
+         All outputs are up-to-date.
+       ManifestResourceCompile:
+         All outputs are up-to-date.
+       Link:
+         All outputs are up-to-date.
+       Manifest:
+         All outputs are up-to-date.
+       FinalizeBuildStatus:
+         Deleting file "Debug\DatLoader.unsuccessfulbuild".
+         Touching "Debug\DatLoader.lastbuildstate".
+     1>Done Building Project "D:\c_project\irrlichit\DatLoader\DatLoader\DatLoader.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.03
