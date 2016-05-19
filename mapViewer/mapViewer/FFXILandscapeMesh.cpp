@@ -215,9 +215,9 @@ bool CFFXILandscapeMesh::loadModelFile(std::string FN, CSceneManager *mgr)
 
 	//check dependency
 	string dependStr;
-	if(mgr->checkDependency(fno, dependStr)) {
-		loadDependency(dependStr);
-	}
+//	if(mgr->checkDependency(fno, dependStr)) {
+//		loadDependency(dependStr);
+//	}
 
 	int dir=0,rem=fno;
 	if(fno>=1000000) {
