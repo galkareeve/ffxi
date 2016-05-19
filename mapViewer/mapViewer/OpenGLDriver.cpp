@@ -220,6 +220,7 @@ void COpenGLDriver::assignGLBufferID(GLuint vb, GLuint uv, GLuint nor, GLuint co
 
 void COpenGLDriver::cleanUp()
 {
+	glDeleteVertexArrays(1, &vao);
 	glDeleteBuffers(1, &vertexbuffer);
 	glDeleteBuffers(1, &uvbuffer);
 	glDeleteBuffers(1, &normalbuffer);
