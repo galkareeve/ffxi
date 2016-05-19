@@ -29,7 +29,8 @@ protected:
 	GLuint uvbuffer;
 	GLuint normalbuffer;
 	GLuint colorbuffer;			//for cube shader
-
+	GLuint vao;
+	
 	GLuint MatrixID;
 	GLuint ViewMatrixID;
 	GLuint ModelMatrixID;
