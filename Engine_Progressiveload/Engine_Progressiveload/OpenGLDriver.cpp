@@ -139,10 +139,15 @@ void COpenGLDriver::assignGLBufferID(GLuint vb, GLuint uv, GLuint nor)
 	vertexbuffer = vb;
 	uvbuffer = uv;
 	normalbuffer = nor;
+	
+	//Create default vertex array
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 }
 
 void COpenGLDriver::cleanUp()
 {
+	glDeleteVertexArrays(1, &vao);
 	glDeleteBuffers(1, &vertexbuffer);
 	glDeleteBuffers(1, &uvbuffer);
 	glDeleteBuffers(1, &normalbuffer);
