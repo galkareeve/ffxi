@@ -212,6 +212,10 @@ void COpenGLDriver::assignGLBufferID(GLuint vb, GLuint uv, GLuint nor, GLuint co
 	uvbuffer = uv;
 	normalbuffer = nor;
 	colorbuffer = col;
+	
+	//Create default vertex array
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 }
 
 void COpenGLDriver::cleanUp()
