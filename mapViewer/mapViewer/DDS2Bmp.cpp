@@ -192,7 +192,8 @@ myRGBA CDDSBlock::BC2getColor(u16 a, myRGBA c0, myRGBA c1, myRGBA c2, myRGBA c3,
 {
 	myRGBA rgba;
 //	a=a;
-	rgba.a=(a==0)? 0:0xff;
+//	rgba.a=(a==0)? 0:0xff;
+	rgba.a = rgba.a << 4;
 //	rgba.a=0xFF;
 	switch(pixel)
 	{
