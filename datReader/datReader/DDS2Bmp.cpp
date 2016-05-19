@@ -194,6 +194,7 @@ myRGBA CDDSBlock::BC2getColor(WORD a, myRGBA c0, myRGBA c1, myRGBA c2, myRGBA c3
 {
 	myRGBA rgba;
 	rgba.a = a;
+	rgba.a = rgba.a << 4;
 	switch(pixel)
 	{
 	case 0:		rgba.r=c0.r; rgba.g=c0.g; rgba.b=c0.b;
@@ -470,7 +471,9 @@ void CDDS2Bmp::convert2BMP(char *p, unsigned int width, unsigned int height, uns
 				break;
 			case '2':	cdds.BC2decodeBlock(mem, image,i,j);
 				break;
-			case '3':	cdds.BC3decodeBlock(mem, image,i,j);
+			case '3':	cdds.BC2decodeBlock(mem, image,i,j);
+				break;
+			case '5':	cdds.BC3decodeBlock(mem, image,i,j);
 				break;
 			}
 			off += blockSize;
