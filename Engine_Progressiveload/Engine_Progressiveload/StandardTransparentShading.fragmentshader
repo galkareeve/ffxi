@@ -60,12 +60,11 @@ void main(){
 //		MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance);
 
 	
-//	color.a = 0.3;
 	vec4 MaterialDiffuseColorAlpha = texture2D(myTextureSampler, UV).rgba;
-//	if(MaterialDiffuseColorAlpha.a <0.5)
-//		discard;
+	if(MaterialDiffuseColorAlpha.a <0.1)
+		discard;
 		
-	color = MaterialDiffuseColorAlpha;
-//	color.rgb = MaterialDiffuseColor;
+//	color = MaterialDiffuseColorAlpha;
+	color.rgb = MaterialDiffuseColor;
 //	color.a = MaterialDiffuseColorAlpha[3];
 }
