@@ -269,7 +269,7 @@ public:
 	void getMeshBufferGroup(std::vector<CMeshBufferGroup*> &out) {out=m_meshBufferGroup;}
 	void addMeshBufferGroup(CMeshBufferGroup *in) {m_meshBufferGroup.push_back(in); };
 	int getMeshBufferGroupCount() { return m_meshBufferGroup.size(); };
-	void refreshMeshBufferGroup(unsigned int i, bool isMZB);
+	void refreshMeshBufferGroup(int i, bool isMZB);
 	
 	int BitCount(unsigned char x);
 	std::string extractImageName(char *p, glm::u32 &width, glm::u32 &height, glm::u8 *& ppImage);
