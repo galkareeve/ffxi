@@ -144,10 +144,12 @@ void CSceneNodeLandscape::drawCube(IDriver *dr, glm::mat4 &MVP)
 	GLuint MVPID = glGetUniformLocation(drID, "MVP");
 	glUniformMatrix4fv(MVPID, 1, GL_FALSE, &MVP[0][0]);
 	dr->drawCube(0, m_pCubeMB);
-	dr->drawCube(0, m_pFrustumMB);
-	dr->drawCube(1, m_pFrustumMB);
-	dr->drawCube(2, m_pFrustumMB);
-	dr->drawCube(3, m_pFrustumMB);
+	if (m_curMMB == -1) {
+		dr->drawCube(0, m_pFrustumMB);
+		dr->drawCube(1, m_pFrustumMB);
+		dr->drawCube(2, m_pFrustumMB);
+		dr->drawCube(3, m_pFrustumMB);
+	}
 	dr->selectProgramID(0);
 }
 
