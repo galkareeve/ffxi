@@ -243,7 +243,8 @@ void CSceneNodeLandscape::checkMBGInFrustum(int start, int count, std::vector<in
 
 		m_checkedMB.insert(std::pair<int,int>(inIndex[k],1));
 		pMBG=m_pMesh->getMeshBufferGroup(inIndex[k]);
-
+		if (pMBG == nullptr)
+			continue;
 		//Oriented Box
 		if(m_SceneManager->isAABoundingBoxInFrustum(pMBG->m_minBoundRect, pMBG->m_maxBoundRect)!=OUTSIDE)
 			m_visibleMBG.push_back(pMBG);
@@ -383,8 +384,11 @@ int CSceneNodeLandscape::getMaxCount()
 void CSceneNodeLandscape::toggleIsOctree() 
 {
 	m_isOctree=!m_isOctree;
-	if(m_isOctree)
+	if(m_isOctree) {
 		m_curMMB=-1;
+		m_isMZB=true;
+		m_visibleMBG.clear();
+	}
 	else
 		m_curMMB=0;
 
