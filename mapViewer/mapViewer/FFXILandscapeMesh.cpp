@@ -323,10 +323,12 @@ bool CFFXILandscapeMesh::loadModelFile(std::string FN, CSceneManager *mgr)
 
 CMeshBufferGroup* CFFXILandscapeMesh::getMeshBufferGroup(unsigned int i)
 {
+	if ( m_meshBufferGroup.empty() || (i >= m_meshBufferGroup.size()))
+		return nullptr;
 	return m_meshBufferGroup[i];
 }
 
-void CFFXILandscapeMesh::refreshMeshBufferGroup(unsigned int i, bool isMZB)
+void CFFXILandscapeMesh::refreshMeshBufferGroup(int i, bool isMZB)
 {
 	char buf[100];
 	int mmbIndex=0, size=0;
