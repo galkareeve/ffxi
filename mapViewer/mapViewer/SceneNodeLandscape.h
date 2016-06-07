@@ -18,7 +18,6 @@ public:
 	void drawNonOctree(IDriver *dr );
 	void drawOctree(IDriver *dr );
 	void drawCube(IDriver *dr, glm::mat4 &MVP);
-	void testDrawCube(IDriver *dr);
 
 	void addMesh(IMesh *in);
 	IMesh* getMesh() { return (IMesh*)m_pMesh; }
