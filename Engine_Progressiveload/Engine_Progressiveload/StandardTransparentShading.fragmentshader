@@ -64,7 +64,7 @@ void main(){
 	if(MaterialDiffuseColorAlpha.a <0.1)
 		discard;
 		
-//	color = MaterialDiffuseColorAlpha;
-	color.rgb = MaterialDiffuseColor;
+	color = MaterialDiffuseColorAlpha;
+//	color.rgb = MaterialDiffuseColor;
 //	color.a = MaterialDiffuseColorAlpha[3];
 }

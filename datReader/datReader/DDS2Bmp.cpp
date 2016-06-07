@@ -9,6 +9,7 @@ CDDSBlock::CDDSBlock(int w, int h)
 {
 	m_width=w;
 	m_height=h;
+	m_pfs = NULL;
 }
 
 CDDSBlock::~CDDSBlock(void)
@@ -16,7 +17,7 @@ CDDSBlock::~CDDSBlock(void)
 
 }
 
-void CDDSBlock::BC1decodeBlock(char *src, char *&des, int brow, int bcol)
+void CDDSBlock::BC1decodeBlock(char *src, char *&des, int brow, int bcol, bool outAlpha)
 {
 	int coloffset = bcol<<2;
 	int roloffset = brow<<2;
@@ -108,7 +109,7 @@ myRGBA CDDSBlock::BC1getColor(BYTE a, myRGBA c0, myRGBA c1, myRGBA c2, myRGBA c3
 	return rgba;
 }
 
-void CDDSBlock::BC2decodeBlock(char *src, char *&des, int brow, int bcol)
+void CDDSBlock::BC2decodeBlock(char *src, char *&des, int brow, int bcol, bool outAlpha)
 {
 	int coloffset = bcol<<2;
 	int roloffset = brow<<2;
@@ -154,18 +155,30 @@ void CDDSBlock::BC2decodeBlock(char *src, char *&des, int brow, int bcol)
 	pRow r = (pRow)(src+12);
 	//get alpha @byte 0-7
 	pAlpha a = (pAlpha)(src);
+	if (outAlpha) {
+		m_pfs->write( src, 1);
+	}
 	BC2decodeColor(a, c0, c1, c2, c3, r, coloffset, roloffset, des);
 
 	r = (pRow)(src+13);
 	a = (pAlpha)(src+2);
+	if (outAlpha) {
+		m_pfs->write((src+2), 1);
+	}
 	BC2decodeColor(a, c0, c1, c2, c3,r, coloffset, roloffset+1, des);
 
 	r = (pRow)(src+14);
 	a = (pAlpha)(src+4);
+	if (outAlpha) {
+		m_pfs->write((src + 4), 1);
+	}
 	BC2decodeColor(a, c0, c1, c2, c3,r, coloffset, roloffset+2, des);
 
 	r = (pRow)(src+15);
 	a = (pAlpha)(src+6);
+	if (outAlpha) {
+		m_pfs->write((src + 6), 1);
+	}
 	BC2decodeColor(a, c0, c1, c2, c3,r, coloffset, roloffset+3, des);
 }
 
@@ -193,8 +206,10 @@ void CDDSBlock::BC2decodeColor(pAlpha a, myRGBA c0, myRGBA c1, myRGBA c2, myRGBA
 myRGBA CDDSBlock::BC2getColor(WORD a, myRGBA c0, myRGBA c1, myRGBA c2, myRGBA c3, BYTE pixel)
 {
 	myRGBA rgba;
-	rgba.a = a;
-	rgba.a = rgba.a << 4;
+//	rgba.a = a;
+//	rgba.a = rgba.a << 4;
+//debug
+	rgba.a = 0xFF;
 	switch(pixel)
 	{
 	case 0:		rgba.r=c0.r; rgba.g=c0.g; rgba.b=c0.b;
@@ -210,7 +225,7 @@ myRGBA CDDSBlock::BC2getColor(WORD a, myRGBA c0, myRGBA c1, myRGBA c2, myRGBA c3
 }
 
 
-void CDDSBlock::BC3decodeBlock(char *src, char *&des, int brow, int bcol)
+void CDDSBlock::BC3decodeBlock(char *src, char *&des, int brow, int bcol, bool outAlpha)
 {
 	int coloffset = bcol<<2;
 	int roloffset = brow<<2;
@@ -265,7 +280,6 @@ void CDDSBlock::BC3decodeBlock(char *src, char *&des, int brow, int bcol)
 		sa.a2=sa.a3=sa.a4=sa.a5=sa.a6=sa.a7=sa.a0;
 	}
 	else if( sa.a0 > sa.a1 ) {
-//	else {
 		sa.a2 = (6*sa.a0 + sa.a1)/7;
 		sa.a3 = (5*sa.a0 + 2*sa.a1)/7;
 		sa.a4 = (4*sa.a0 + 3*sa.a1)/7;
@@ -427,8 +441,15 @@ rgba.a = 0xff;
 	return rgba;
 }
 
+void CDDSBlock::setFileStream(std::ofstream *fs)
+{
+	m_pfs = fs;
+}
+
+
 CDDS2Bmp::CDDS2Bmp(void)
 {
+	m_outputAlpha = false;
 }
 
 
@@ -450,6 +471,7 @@ void CDDS2Bmp::convert2BMP(char *p, unsigned int width, unsigned int height, uns
 	image = new char[imageSize];
 	memset(image, 0, imageSize);
 
+	//divide by 4 (4X4 pixel per block)
 	int bcol = (width+3)>>2;
 	int brow = (height+3)>>2;
 
@@ -458,6 +480,10 @@ void CDDS2Bmp::convert2BMP(char *p, unsigned int width, unsigned int height, uns
 	if(ddsType=='1')
 		blockSize = 8;
 
+	if (m_outputAlpha) {
+		writeFile.open("alphaData", std::ofstream::app | std::ofstream::binary);
+		cdds.setFileStream(&writeFile);
+	}
 	//each block is 16byte to represent 64byte of RGBA
 	char mem[16];
 	char *off=p;
@@ -469,17 +495,20 @@ void CDDS2Bmp::convert2BMP(char *p, unsigned int width, unsigned int height, uns
 			{
 			case '1':	cdds.BC1decodeBlock(mem, image,i,j);
 				break;
-			case '2':	cdds.BC2decodeBlock(mem, image,i,j);
+			case '2':	cdds.BC2decodeBlock(mem, image,i,j, m_outputAlpha);
 				break;
-			case '3':	cdds.BC2decodeBlock(mem, image,i,j);
+			case '3':	cdds.BC2decodeBlock(mem, image,i,j, m_outputAlpha);
 				break;
-			case '5':	cdds.BC3decodeBlock(mem, image,i,j);
+			case '5':	cdds.BC3decodeBlock(mem, image, i, j);
 				break;
 			}
 			off += blockSize;
 		}
 		offset++;	//dummy for debug
 	}
+
+	if (m_outputAlpha)
+		writeFile.close();
 
 	if(fn==NULL)
 		return;
@@ -537,6 +566,11 @@ std::string CDDS2Bmp::fixFileName(char *fn)
 	str.assign(fn);
 	str += ".bmp";
 	return str;
+}
+
+void CDDS2Bmp::setOutputAlpha(bool f)
+{
+	m_outputAlpha = f;
 }
 
 void CDDS2Bmp::testCreateBMP(char *p, int width, int height, char *fn)

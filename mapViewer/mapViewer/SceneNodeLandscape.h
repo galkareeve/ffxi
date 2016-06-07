@@ -29,8 +29,13 @@ public:
 
 	void nextMMB();
 	void prevMMB();
+	void nextMMBModel();
+	int getMMBModelInfo() {	return m_curMMBModel; }
+	void toggleMMBModelInclusive() { m_isMMBModelInc = !m_isMMBModelInc; }
+	bool isMMBModelInclusive() { return m_isMMBModelInc; }
 	void setCurrentMMB(int mmb);
 	int getCurrentMMB() { return m_curMMB; }
+
 	void wirteMeshBuffer();
 	void toggleIsMZB() { m_isMZB=!m_isMZB; }
 	void toggleIsOctree();
@@ -52,9 +57,13 @@ protected:
 	unsigned int m_lastTime;
 	float m_curFrame;
 	int m_curMMB;
+	
 	bool m_isMZB;		//toggle btw lookupMMB by B100 or MMB index
 	bool m_isOctree;
 	bool m_drawCube;
+	bool m_isMMBModelInc;
+	int m_curMMBModel;	//draw individual model within each MMB
+
 	IMeshBuffer *m_pCubeMB;
 	IMeshBuffer *m_pFrustumMB;
 

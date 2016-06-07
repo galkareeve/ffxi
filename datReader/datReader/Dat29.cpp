@@ -12,7 +12,7 @@ using namespace std;
 
 extern bool isLoaded;
 CDDSLoader loader;
-char ffxidir[512]="D:\\Program Files\\PlayOnline\\SquareEnix\\FINAL FANTASY XI\\";
+char ffxidir[512]="e:\\Program Files (x86)\\PlayOnline2\\SquareEnix\\FINAL FANTASY XI\\";
 
 //void LocateFFXIDataFolder()
 //{
@@ -114,6 +114,10 @@ bool CDat29::extractDat()
 			ii = (IMGINFOA1*)(p+sizeof(DATHEAD));
 			memcpy(name, ii->id, 16);
 			name[16]=0x00;
+			if (strcmp(name, "model   d_pai_01") == 0)
+				ddsbmp.setOutputAlpha(true);
+			else
+				ddsbmp.setOutputAlpha(false);
 			width = ii->imgx;
 			height = ii->imgy;
 			switch( ii->flg )
@@ -128,7 +132,7 @@ bool CDat29::extractDat()
 				else
 					ddsbmp.convert2BMP(pStorage, width, height, ii->size, ii->widthbyte, ii->ddsType[0], NULL, bmpImg);
 				makeImage(bmpImg, name, width, height);
-//				makeDDS( pStorage, name, width, height );
+				makeDDS( pStorage, name, width, height );
 				delete[] pStorage;
 				delete[] bmpImg;
 			break;

@@ -18,6 +18,7 @@ CSceneNodeLandscape::CSceneNodeLandscape(ISceneNode *parent, CSceneManager *mgr)
 	m_drawCube=false;
 	m_pCubeMB=nullptr;
 	m_pFrustumMB=nullptr;
+	m_isMMBModelInc = true;
 }
 
 CSceneNodeLandscape::~CSceneNodeLandscape(void)
@@ -98,13 +99,20 @@ void CSceneNodeLandscape::draw(IDriver *dr, glm::mat4 &ProjectionMatrix, glm::ma
 
 void CSceneNodeLandscape::drawNonOctree(IDriver *dr )
 {
+	int bflg=0;
 	int i,gc = m_pMesh->getMeshBufferGroupCount(),count=0,mbc;
 	for(i=0; i<gc; ++i) {
 		CMeshBufferGroup *pMBG = m_pMesh->getMeshBufferGroup(i);
 		mbc=pMBG->getMeshBufferCount();
 		for(int j=0; j<mbc; ++j) {
-			IMeshBuffer *mb = pMBG->getMeshBuffer(j);
-			dr->draw(floor(m_curFrame), mb);
+			if ((m_curMMBModel == -1) || (m_isMMBModelInc && (m_curMMBModel == j)) || (!m_isMMBModelInc && (m_curMMBModel!=j))) {
+				IMeshBuffer *mb = pMBG->getMeshBuffer(j);
+				if (mb->m_useAlpha && (mb->getMultipler() & 0x08))
+					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				else
+					glBlendFunc(GL_ONE, GL_ZERO);
+				dr->draw(floor(m_curFrame), mb, mb->getMultipler(), mb->m_useAlpha);
+			}
 		}
 		count++;
 	}
@@ -117,18 +125,23 @@ void CSceneNodeLandscape::drawNonOctree(IDriver *dr )
 
 void CSceneNodeLandscape::drawOctree(IDriver *dr )
 {
+	int bflg = 0;
 	int i,gc = m_visibleMBG.size(),count=0,mbc;
 
 	for(i=0; i<gc; ++i) {
 		CMeshBufferGroup *pMBG = m_visibleMBG[i];
-		if(pMBG->m_timeLastDrawn==m_lastTime)
+		if(!pMBG || pMBG->m_timeLastDrawn==m_lastTime)
 			continue;
 
 		pMBG->m_timeLastDrawn=m_lastTime;
 		mbc=pMBG->getMeshBufferCount();
 		for(int j=0; j<mbc; ++j) {
-			IMeshBuffer *mb = pMBG->getMeshBuffer(j);			
-			dr->draw(floor(m_curFrame), mb);
+			IMeshBuffer *mb = pMBG->getMeshBuffer(j);
+			if (mb->m_useAlpha && (mb->getMultipler() & 0x08))
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			else
+				glBlendFunc(GL_ONE, GL_ZERO);
+			dr->draw(floor(m_curFrame), mb, mb->getMultipler(), mb->m_useAlpha);
 		}
 		count++;
 	}
@@ -245,6 +258,7 @@ void CSceneNodeLandscape::checkMBGInFrustum(int start, int count, std::vector<in
 		pMBG=m_pMesh->getMeshBufferGroup(inIndex[k]);
 		if (pMBG == nullptr)
 			continue;
+
 		//Oriented Box
 		if(m_SceneManager->isAABoundingBoxInFrustum(pMBG->m_minBoundRect, pMBG->m_maxBoundRect)!=OUTSIDE)
 			m_visibleMBG.push_back(pMBG);
@@ -336,7 +350,7 @@ void CSceneNodeLandscape::setCurrentMMB(int mmb)
 void CSceneNodeLandscape::nextMMB()
 {
 	if(m_isOctree) {
-		std::cout << "using octree, no MMB, press O to remove octree" << std::endl;
+		std::cout << "To view individual MMB/MZB, press 'O' to remove octree, 'M' to switch, 'V' to view subPiece" << std::endl;
 		return;
 	}
 	int maxC=getMaxCount();
@@ -347,15 +361,17 @@ void CSceneNodeLandscape::nextMMB()
 		if(m_curMMB>=maxC)
 			m_curMMB=0;
 	}
+	m_curMMBModel = -1;
 	m_pMesh->refreshMeshBufferGroup(m_curMMB, m_isMZB);
 	updateBoundingRect();
 }
 
 void CSceneNodeLandscape::prevMMB()
 {
-	if(m_isOctree)
+	if (m_isOctree) {
+		std::cout << "To view individual MMB/MZB, press 'O' to remove octree, 'M' to switch, 'V' to view subPiece" << std::endl;
 		return;
-
+	}
 	int maxC=getMaxCount();
 	if(m_curMMB==-1)
 		m_curMMB=0;
@@ -364,8 +380,18 @@ void CSceneNodeLandscape::prevMMB()
 		if(m_curMMB<0)
 			m_curMMB=maxC-1;
 	}
+	m_curMMBModel = -1;
 	m_pMesh->refreshMeshBufferGroup(m_curMMB, m_isMZB);
 	updateBoundingRect();
+}
+
+void CSceneNodeLandscape::nextMMBModel()
+{
+	CMeshBufferGroup *pMBG = m_pMesh->getMeshBufferGroup(0);
+	int mbc = pMBG->getMeshBufferCount();
+	++m_curMMBModel;
+	if (m_curMMBModel >= mbc)
+		m_curMMBModel = -1;
 }
 
 void CSceneNodeLandscape::wirteMeshBuffer()
@@ -381,19 +407,21 @@ int CSceneNodeLandscape::getMaxCount()
 	return m_pMesh->getMMBCount();
 }
 
-void CSceneNodeLandscape::toggleIsOctree() 
+void CSceneNodeLandscape::toggleIsOctree()
 {
-	m_isOctree=!m_isOctree;
-	if(m_isOctree) {
-		m_curMMB=-1;
-		m_isMZB=true;
+	m_isOctree = !m_isOctree;
+	if (m_isOctree) {
+		m_curMMB = -1;
+		m_isMZB = true;
 		m_visibleMBG.clear();
 	}
-	else
-		m_curMMB=0;
-
+	else {
+		m_curMMB = 0;
+		m_curMMBModel = -1;
+		m_isMMBModelInc = true;
+	}
 	m_pMesh->refreshMeshBufferGroup(m_curMMB, m_isMZB);
-	if(!m_isOctree && m_curMMB!=-1) {
+	if (!m_isOctree && m_curMMB != -1) {
 		updateBoundingRect();
 	}
 }

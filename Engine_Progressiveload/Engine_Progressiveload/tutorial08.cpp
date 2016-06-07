@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <vector>
 
+//#pragma comment(lib,"legacy_stdio_definitions.lib")
 #pragma comment(lib,"opengl32.lib")
 #pragma comment(lib,"glfw3.lib")
 #pragma comment(lib,"glew32.lib")
@@ -13,7 +14,7 @@
 #include <GL/glew.h>
 
 // Include GLFW
-#include <glfw3.h>
+#include <glfw/glfw3.h>
 GLFWwindow* window;
 
 // Include GLM
@@ -69,6 +70,8 @@ int main( int argc, char** argv )
 
 	// Dark blue background
 	glClearColor(0.0f, 0.0f, 0.5f, 1.0f);
+	GLenum err = glGetError();
+	err = glGetError();
 
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
@@ -78,9 +81,9 @@ int main( int argc, char** argv )
 	// Cull triangles which normal is not towards the camera
 //	glEnable(GL_CULL_FACE);
 
-//	GLuint VertexArrayID;
-//	glGenVertexArrays(1, &VertexArrayID);
-//	glBindVertexArray(VertexArrayID);
+	GLuint VertexArrayID;
+	glGenVertexArrays(1, &VertexArrayID);
+	glBindVertexArray(VertexArrayID);
 
 	// Create and compile our GLSL program from the shaders
 	GLuint programID = LoadShaders( "StandardShading.vertexshader", "StandardTransparentShading.fragmentshader" );
@@ -115,16 +118,7 @@ int main( int argc, char** argv )
 
 	CSceneNode *pTargetNode=pnode;
 
-	GLuint vertexbuffer;
-	glGenBuffers(1, &vertexbuffer);
-
-	GLuint uvbuffer;
-	glGenBuffers(1, &uvbuffer);
-
-	GLuint normalbuffer;
-	glGenBuffers(1, &normalbuffer);
-
-	pDriver->assignGLBufferID(vertexbuffer, uvbuffer, normalbuffer);
+	pDriver->assignGLBufferID();
 
 	GLuint shaderTextureID  = glGetUniformLocation(programID, "myTextureSampler");
 	pDriver->setShaderTextureID(shaderTextureID);
@@ -136,6 +130,7 @@ int main( int argc, char** argv )
 //	glFrontFace(GL_CW);
 	// Enable blending
 //	glEnable(GL_BLEND);
+//	glBlendFunc(GL_ONE, GL_ZERO);
 //	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	char title[100];
 	int lastFPS=0, count=0;
@@ -183,7 +178,7 @@ int main( int argc, char** argv )
 
 	// Cleanup VBO and shader
 	pDriver->cleanUp();
-//	glDeleteVertexArrays(1, &VertexArrayID);
+	glDeleteVertexArrays(1, &VertexArrayID);
 
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();

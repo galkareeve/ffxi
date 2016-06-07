@@ -66,6 +66,7 @@ IMesh* CSceneManager::loadMeshLandscape(std::string fn, unsigned int tid)
 {
 	CFFXILandscapeMesh *ffmeshLandscape = new CFFXILandscapeMesh(m_pDriver, tid);
 	if( ffmeshLandscape->loadModelFile(fn,this) ) {
+		std::cout << "Loading Dat: " << fn << " ......" << std::endl;
 		return ffmeshLandscape;
 	}
 	return NULL;

@@ -28,12 +28,21 @@ struct SMMBHEAD {
 	char unk[9];
 };
 //16 byte
+//struct SMMBHEAD2 {
+//	unsigned int MMBSize : 24;
+//	unsigned int d1 : 8;
+//	unsigned short d3 : 8;
+//	unsigned short d4 : 8;
+//	char unk2[2];
+//	char name[8];
+//};
 struct SMMBHEAD2 {
 	unsigned int MMBSize:24;
-	unsigned int d1:8;
-	unsigned short d3:8;
-	unsigned short d4:8;
-	char unk2[2];		//FF FF
+	unsigned int d1 : 8;
+	unsigned short d3 : 8;
+	unsigned short d4 : 8;
+	unsigned short d5 : 8;
+	unsigned short d6 : 8;
 	char name[8];
 };
 
@@ -148,58 +157,58 @@ typedef struct
 //  unsigned int noBlock;
 //} IMGINFO1;
 
-typedef struct
-{
-  DWORD idno;
-  WORD itemtype;
-  WORD nazo11[0x02];		//謎
-  DWORD no;
-  WORD lvl;
-  WORD basyo;				//場所
-  WORD syuzoku;				//種族
-  WORD jobs;
-  WORD dmg;
-  WORD kaku;				//各 (1-hand/2-hand)
-  WORD nazo13;
-  WORD type;
-  char namej[22];
-  char namee[22];
-  char info[96];
-  char infoe[96];
-  char nazo2[512-0x1e-22-22-96-96];
-
-//0x200
-  DWORD size;
-  IMGINFO ii;
-  BYTE img[0xa00-4-sizeof(IMGINFO)];
-} BUKIINFO;
-
-typedef struct
-{
-  DWORD idno;
-  WORD itemtype;
-  WORD nazo11[0x02];
-  DWORD no;
-  WORD lvl;
-  WORD basyo;
-  WORD syuzoku;
-  WORD jobs;
-  WORD dmg;
-  WORD kaku;
-  WORD nazo13;
-  WORD type;
-  char namet[22];
-  char name[34];
-  char name2[64];
-  char name2s[64];
-  char info[96];
-  char nazo2[512-0x1e-22-34-64-64-96];
-
-//0x200
-  DWORD size;
-  IMGINFO ii;
-  BYTE img[0xa00-4-sizeof(IMGINFO)];
-} BUKIINFOE;
+//typedef struct
+//{
+//  DWORD idno;
+//  WORD itemtype;
+//  WORD nazo11[0x02];		//謎
+//  DWORD no;
+//  WORD lvl;
+//  WORD basyo;				//場所
+//  WORD syuzoku;				//種族
+//  WORD jobs;
+//  WORD dmg;
+//  WORD kaku;				//各 (1-hand/2-hand)
+//  WORD nazo13;
+//  WORD type;
+//  char namej[22];
+//  char namee[22];
+//  char info[96];
+//  char infoe[96];
+//  char nazo2[512-0x1e-22-22-96-96];
+//
+////0x200
+//  DWORD size;
+//  IMGINFO ii;
+//  BYTE img[0xa00-4-sizeof(IMGINFO)];
+//} BUKIINFO;
+//
+//typedef struct
+//{
+//  DWORD idno;
+//  WORD itemtype;
+//  WORD nazo11[0x02];
+//  DWORD no;
+//  WORD lvl;
+//  WORD basyo;
+//  WORD syuzoku;
+//  WORD jobs;
+//  WORD dmg;
+//  WORD kaku;
+//  WORD nazo13;
+//  WORD type;
+//  char namet[22];
+//  char name[34];
+//  char name2[64];
+//  char name2s[64];
+//  char info[96];
+//  char nazo2[512-0x1e-22-34-64-64-96];
+//
+////0x200
+//  DWORD size;
+//  IMGINFO ii;
+//  BYTE img[0xa00-4-sizeof(IMGINFO)];
+//} BUKIINFOE;
 
 typedef struct
 {
@@ -669,7 +678,8 @@ typedef struct
 struct SMZBHeader {
 	char id[4];
 //	unsigned int id;
-	unsigned int totalRecord100;
+	unsigned int totalRecord100:24;
+	unsigned int R100Flag:8;
 	unsigned int offsetHeader2;
 	unsigned int d1:8;
 	unsigned int d2:8;
@@ -682,7 +692,8 @@ struct SMZBHeader {
 };
 
 struct SMZBHeader2 {
-	unsigned int totalRecord92;
+	unsigned int totalRecord92:24;
+	unsigned int R92Flag:8;
 	unsigned int offsetBlock92;
 	unsigned int totalBlock16;
 	unsigned int offsetBlock16;
@@ -719,7 +730,8 @@ struct SMZBBlock100 {
 	float fRotX,fRotY,fRotZ;
 	float fScaleX,fScaleY,fScaleZ;
 	float fa,fb,fc,fd;				//0, 10, 100, 1000
-	long  fe,ff,fg,fh,fi,fj,fk,fl;
+	long fe,ff,fg;
+	long fh, fi, fj, fk, fl;
 };
 
 //special
@@ -825,7 +837,8 @@ struct SMMBBlockHeader {
 
 struct SMMBModelHeader {
 	char textureName[16];
-	unsigned int vertexsize;			//No of SMMBBlockVertex
+	unsigned short vertexsize;			//No of SMMBBlockVertex
+	unsigned short blending;			//useAlpha & multipler
 };
 
 struct SMMBBlockVertex {
@@ -906,18 +919,17 @@ public:
 		pData = pdat;
 		return pData;
 	}
-	LPSTR NextData(DATHEAD *phd)
-	{
-		if(!pData) return NULL;
-		*phd = *(DATHEAD *)pData;
-		unsigned int next = phd->next;
-		if( next<=0 ) return NULL;
-		next = (next & 0x7ffff) * 16;
-		if( pdat+dwSize<=pData+next ) return NULL;
-		pData += next;
-		*phd = *(DATHEAD *)pData;
-		return pData;
-	}
+	LPSTR NextData(DATHEAD *phd);
+	//{
+	//	if(!pData) return NULL;
+	//	*phd = *(DATHEAD *)pData;
+	//	int next = phd->next;
+	//	if( next<=0 ) return NULL;
+	//	if( pdat+dwSize<=pData+next*16 ) return NULL;
+	//	pData += next*16;
+	//	*phd = *(DATHEAD *)pData;
+	//	return pData;
+	//}
 	BOOL Free(void)
 	{
 		dwSize = 0;

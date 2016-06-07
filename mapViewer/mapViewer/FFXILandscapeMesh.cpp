@@ -1,13 +1,14 @@
 #include "FFXILandscapeMesh.h"
 #include "TDWAnalysis.h"
 #include "myEnum.h"
-#include "MeshBufferGroup.h"
+
 #include "IMeshBuffer.h"
 #include "OpenGLDriver.h"
 #include "myEnum.h"
 #include "DDS2Bmp.h"
 #include "SceneManager.h"
 #include "Utility.h"
+#include "MeshBufferGroup.h"
 
 #include <iostream>
 #include <fstream>
@@ -17,7 +18,7 @@
 
 //#include <Windows.h>
 
-char ffxidir[512]="D:\\Program Files\\PlayOnline\\SquareEnix\\FINAL FANTASY XI\\";
+char ffxidir[512]="E:\\Program Files (x86)\\PlayOnline2\\SquareEnix\\FINAL FANTASY XI\\";
 
 using namespace std;
 
@@ -134,75 +135,78 @@ void CFFXILandscapeMesh::recalculateBoundingBox()
 
 void CFFXILandscapeMesh::loadDependency( std::string dependStr)
 {
-	std::list<std::string> listStr;
-	CUtility::explode(",", dependStr, listStr);
+	//std::list<std::string> listStr;
+	//CUtility::explode(",", dependStr, listStr);
 
-	char filename[256];
-	std::string FN;
-	unsigned int dir=0,rem,fno;
-	for(auto it=listStr.begin(); it!=listStr.end(); ++it) {
-		fno = atoi(it->c_str());
-		rem = fno;
-		if(fno>=1000000) {
-			dir=fno/1000000;
-			rem -= dir*1000000;
-		}
-		
-		if(dir==0) sprintf_s(filename,255,"%sROM\\%d\\%d.dat",ffxidir,rem/1000,rem%1000);  
-		else       sprintf_s(filename,255,"%sROM%d\\%d\\%d.dat",ffxidir,dir,rem/1000,rem%1000);
-		FN.assign(filename);
+	//char filename[256];
+	//std::string FN;
+	//unsigned int dir=0,rem,fno;
+	//for(auto it=listStr.begin(); it!=listStr.end(); ++it) {
+	//	fno = atoi(it->c_str());
+	//	rem = fno;
+	//	if(fno>=1000000) {
+	//		dir=fno/1000000;
+	//		rem -= dir*1000000;
+	//	}
+	//	else {
+	//		dir = 0;
+	//		rem = fno;
+	//	}
+	//	if(dir==0) sprintf_s(filename,255,"%sROM\\%d\\%d.dat",ffxidir,rem/1000,rem%1000);  
+	//	else       sprintf_s(filename,255,"%sROM%d\\%d\\%d.dat",ffxidir,dir,rem/1000,rem%1000);
+	//	FN.assign(filename);
 
-		ifstream ifs;
-		ifs.open(FN.c_str(), ifstream::in | ifstream::binary);
-		if(ifs.fail() ) {
-			return;
-		}
-	
-		ifs.seekg (0, ifs.end);
-		int length = ifs.tellg();
-		ifs.seekg (0, ifs.beg);
+	//	ifstream ifs;
+	//	ifs.open(FN.c_str(), ifstream::in | ifstream::binary);
+	//	if(ifs.fail() ) {
+	//		return;
+	//	}
+	//
+	//	ifs.seekg (0, ifs.end);
+	//	int length = ifs.tellg();
+	//	ifs.seekg (0, ifs.beg);
 
-		// allocate memory:
-		char * buffer = new char [length];
+	//	// allocate memory:
+	//	char * buffer = new char [length];
 
-		// read data as a block:
-		ifs.read (buffer,length);
-		ifs.close();
+	//	// read data as a block:
+	//	ifs.read (buffer,length);
+	//	ifs.close();
 
-		FFXIFile *f = new FFXIFile(buffer,length);
+	//	FFXIFile *f = new FFXIFile(buffer,length);
 
-		//extract file
-		string textureName;
+	//	//extract file
+	//	string textureName;
 
-		m_vectextureInfo.clear();
-		glm::u8 *ppImage=NULL;
-		unsigned int width,height;
-		unsigned int len;
-		DATHEAD hd;
-		SLandscapeTextureInfo tf;
+	//	m_vectextureInfo.clear();
+	//	glm::u8 *ppImage=NULL;
+	//	unsigned int width,height;
+	//	unsigned int len;
+	//	DATHEAD hd;
+	//	SLandscapeTextureInfo tf;
 
-		char *p, *start=f->FistData(&hd);
-		for( p=f->FistData(&hd); p; p=f->NextData(&hd) )
-		{
-			int type = (int)hd.type;
-			len = (hd.next&0x7ffff)*16;
+	//	char *p, *start=f->FistData(&hd);
+	//	for( p=f->FistData(&hd); p; p=f->NextData(&hd) )
+	//	{
+	//		int type = (int)hd.type;
+	//		len = (hd.next&0x7ffff)*16;
 
-			switch (type)
-			{
-				case 0x2e:  //MMB
-					decode_mmb((unsigned char*)(p+16));
-					extractMMB(p+sizeof(DATHEAD), len-sizeof(DATHEAD), true);							
-				break;
-				case 0x20:  //IMG
-					tf.name = extractImageName(p+sizeof(DATHEAD), width, height, ppImage);
-					tf.id=p_driver->createTexture(width,height,1,ppImage);
-					m_vectextureInfo.push_back(tf);
-					delete ppImage;
-				break;
-			}
-		}
-		delete f;
-	}
+	//		switch (type)
+	//		{
+	//			case 0x2e:  //MMB
+	//				decode_mmb((unsigned char*)(p+16));
+	//				extractMMB(p+sizeof(DATHEAD), len-sizeof(DATHEAD), true);							
+	//			break;
+	//			case 0x20:  //IMG
+	//				tf.name = extractImageName(p+sizeof(DATHEAD), width, height, ppImage);
+	//				tf.id=p_driver->createTexture(width,height,1,ppImage);
+	//				m_vectextureInfo.push_back(tf);
+	//				delete ppImage;
+	//			break;
+	//		}
+	//	}
+	//	delete f;
+	//}
 }
 
 bool CFFXILandscapeMesh::loadModelFile(std::string FN, CSceneManager *mgr)
@@ -278,10 +282,10 @@ bool CFFXILandscapeMesh::loadModelFile(std::string FN, CSceneManager *mgr)
 					MMBc++;
 			break;
 			case 0x20:  //IMG	
-					tf.name = extractImageName(p+sizeof(DATHEAD), width, height, ppImage);
-					tf.id=p_driver->createTexture(width,height,1,ppImage);
+					tf = extractImageName(p+sizeof(DATHEAD), width, height, ppImage);
+//					tf.id=p_driver->createTexture(width,height,1,ppImage);
 					m_vectextureInfo.push_back(tf);
-					delete ppImage;
+//					delete ppImage;
 					IMGc++;
 			break;
 			case 0x29:	//Bone
@@ -300,6 +304,7 @@ bool CFFXILandscapeMesh::loadModelFile(std::string FN, CSceneManager *mgr)
 		}
 	}
 
+	int tot_v = 0, tot_nv = 0;
 	char buf[255];
 	sprintf_s(buf,255,"MZB:%d MMB:%d IMG:%d BONE:%d ANIM:%d VERT:%d", MZBc,MMBc,IMGc,BONEc,ANIMc,VERTc);
 	std::cout << buf << std::endl;
@@ -309,13 +314,17 @@ bool CFFXILandscapeMesh::loadModelFile(std::string FN, CSceneManager *mgr)
 		std::cout << "Total B100: " << m_vecMZB.size() << std::endl;	
 		for(auto it=m_vecMZB.begin(); it!=m_vecMZB.end(); ++it, ++mzbIndex) {
 			length = findMMBIndex(&(*it));
-			if(!lookupMMB( mzbIndex, length, &(*it))) {
+			if (!lookupMMB(mzbIndex, length, &(*it))) {
 				memcpy(buf, (*it).id, 16);
-				buf[16]=0x00;
+				buf[16] = 0x00;
 				std::cout << "MMB not valid " << buf << std::endl;
+				tot_nv++;
 			}
+			else
+				tot_v++;
 		}
 	}
+	std::cout << "Total Valid: " << tot_v << "  Total Invalid: " << tot_nv << std::endl;
 	recalculateBoundingBox();
 	return true;
 }
@@ -331,8 +340,8 @@ CMeshBufferGroup* CFFXILandscapeMesh::getMeshBufferGroup(unsigned int i)
 void CFFXILandscapeMesh::refreshMeshBufferGroup(int i, bool isMZB)
 {
 	char buf[100];
-	int mmbIndex=0, size=0;
-	SMZBBlock100 b100;
+	int mmbIndex=0, mzbIndex=0, size=0;
+	SMZBBlock100 *b100;
 	for(auto it=m_meshBufferGroup.begin(); it!=m_meshBufferGroup.end(); ++it)
 		delete *it;
 
@@ -340,10 +349,10 @@ void CFFXILandscapeMesh::refreshMeshBufferGroup(int i, bool isMZB)
 	if(isMZB) {
 		if(i!=-1) {
 			//only refresh ith record MZB, but each B100 record can have many meshBuffer (numModel)
-			b100 = m_vecMZB[i];
-			mmbIndex = findMMBIndex(&b100);
-			if(!lookupMMB( i, mmbIndex, &b100 )) {
-				memcpy(buf, b100.id, 16);
+			b100 = &m_vecMZB[i];
+			mmbIndex = findMMBIndex(b100);
+			if(!lookupMMB( i, mmbIndex, b100 )) {
+				memcpy(buf, b100->id, 16);
 				buf[16]=0x00;
 				std::cout << "MZB not valid (" << i << ")   id: " << buf << std::endl;
 			}
@@ -352,10 +361,10 @@ void CFFXILandscapeMesh::refreshMeshBufferGroup(int i, bool isMZB)
 			//refresh all MZB
 			size=m_vecMZB.size();
 			for(int j=0; j<size; ++j) {
-				b100 = m_vecMZB[j];
-				mmbIndex = findMMBIndex(&b100);
-				if(!lookupMMB( j, mmbIndex, &b100 )) {
-					memcpy(buf, b100.id, 16);
+				b100 = &m_vecMZB[j];
+				mmbIndex = findMMBIndex(b100);
+				if(!lookupMMB( j, mmbIndex, b100 )) {
+					memcpy(buf, b100->id, 16);
 					buf[16]=0x00;
 					std::cout << "MZB not valid (" << j << ")   id: " << buf << std::endl;
 				}
@@ -364,6 +373,12 @@ void CFFXILandscapeMesh::refreshMeshBufferGroup(int i, bool isMZB)
 	}
 	else {
 		//refresh MMB
+//		mzbIndex = findMZBIndex(m_vecMMB[i]->m_SMMBHeader.imgID);
+//		if (mzbIndex >= 0)
+//			b100 = &m_vecMZB[mzbIndex];
+//		else
+//			b100 = nullptr;
+//		if(!lookupMMB(-1, i, b100)) {
 		if(!lookupMMB(-1, i, nullptr)) {
 			std::cout << "MMB not valid (" << i << ")  " << std::endl;
 		}
@@ -375,11 +390,11 @@ void CFFXILandscapeMesh::toggleMMBTransform()
 	m_isTransform=!m_isTransform;
 }
 
-std::string CFFXILandscapeMesh::extractImageName(char *p, glm::u32 &width, glm::u32 &height, glm::u8 *& ppImage)
+SLandscapeTextureInfo CFFXILandscapeMesh::extractImageName(char *p, glm::u32 &width, glm::u32 &height, glm::u8 *& ppImage)
 {
 	char buf[50];
 	int len;
-	std::string imgname;
+//	std::string imgname;
 	char *bytePtr;
 	unsigned char *pPalett;
 	IMGINFOB1 *ib = nullptr;
@@ -389,6 +404,8 @@ std::string CFFXILandscapeMesh::extractImageName(char *p, glm::u32 &width, glm::
 	u32 *pPal=nullptr;
 	CDDS2Bmp ddsbmp;
 
+	SLandscapeTextureInfo tf;
+
 	IMGINFOA1 *ii = (IMGINFOA1*)(p);
 	width = ii->imgx;
 	height = ii->imgy;
@@ -396,14 +413,17 @@ std::string CFFXILandscapeMesh::extractImageName(char *p, glm::u32 &width, glm::
 	//copy name
 	memcpy(buf, ii->id, 16);
 	buf[16]=0x00;
-	imgname.assign(buf);
+//	imgname.assign(buf);
+	tf.name.assign(buf);
 
 	switch( ii->flg )
 	{
 	case 0xA1:	pDDSBlock = new u8[ii->size];
 				memset(pDDSBlock, 0, ii->size);
 				memcpy(pDDSBlock, p+sizeof(IMGINFOA1), ii->size);
-				ddsbmp.convert2BMP(pDDSBlock, width, height, ii->size, ii->widthbyte, ii->ddsType[0], NULL, ppImage);
+//				ddsbmp.convert2BMP(pDDSBlock, width, height, ii->size, ii->widthbyte, ii->ddsType[0], NULL, ppImage);
+				tf.id = p_driver->createDDSTexture(atoi(&ii->ddsType[0]), width, height, 1, pDDSBlock);
+			
 				delete[] pDDSBlock;
 	break;
 			
@@ -420,6 +440,8 @@ std::string CFFXILandscapeMesh::extractImageName(char *p, glm::u32 &width, glm::
 						bytePtr++;
 					}
 				}
+				tf.id = p_driver->createTexture(width, height, 1, ppImage);
+				delete[] ppImage;
 	break;
 
 	case 0x81:
@@ -451,7 +473,9 @@ std::string CFFXILandscapeMesh::extractImageName(char *p, glm::u32 &width, glm::
 					memset(pDDSBlock, 0, i81DDS->size);
 					//len is palette index (1byte)
 					memcpy(pDDSBlock, (p+sizeof(IMGINFO)+len+sizeof(IMGINFO81_DDS)), i81DDS->size);
-					ddsbmp.convert2BMP(pDDSBlock, width, height, i81DDS->size, 32, i81DDS->ddsType[0], NULL, ppImage);
+//					ddsbmp.convert2BMP(pDDSBlock, width, height, i81DDS->size, 32, i81DDS->ddsType[0], NULL, ppImage);
+					tf.id = p_driver->createDDSTexture(atoi(&i81DDS->ddsType[0]), width, height, 1, pDDSBlock);
+
 					delete[] pDDSBlock;
 				}
 				else {
@@ -463,6 +487,8 @@ std::string CFFXILandscapeMesh::extractImageName(char *p, glm::u32 &width, glm::
 							bytePtr++;
 						}
 					}
+					tf.id = p_driver->createTexture(width, height, 1, ppImage);
+					delete[] ppImage;
 				}
 	break;
 
@@ -478,6 +504,8 @@ std::string CFFXILandscapeMesh::extractImageName(char *p, glm::u32 &width, glm::
 						bytePtr++;
 					}
 				}
+				tf.id = p_driver->createTexture(width, height, 1, ppImage);
+				delete[] ppImage;
 	break;
 
 	case 0x05:
@@ -494,6 +522,8 @@ std::string CFFXILandscapeMesh::extractImageName(char *p, glm::u32 &width, glm::
 				for(int index=0; index<len; ++index) {
 					memcpy(&ppImage[index*4], &pPal[pPalett[index]], 4);
 				}
+				tf.id = p_driver->createTexture(width, height, 1, ppImage);
+				delete[] ppImage;
 	break;
 
 	case 0x91:
@@ -509,13 +539,16 @@ std::string CFFXILandscapeMesh::extractImageName(char *p, glm::u32 &width, glm::
 						bytePtr++;
 					}
 				}
-				break;
+				tf.id = p_driver->createTexture(width, height, 1, ppImage);
+				delete[] ppImage;
+	break;
 
 	default:
 			cout << "Unknown IMG type: " << ii->flg << endl;
 	}
 
-	return imgname;
+	//return imgname;
+	return tf;
 }
 
 
@@ -699,10 +732,14 @@ void CFFXILandscapeMesh::extractMMB(char *p, unsigned int len, bool isDepend)
 	SMMBHEAD2 *pMMB2 = (SMMBHEAD2*)(p+totalsize);
 	totalsize += sizeof(SMMBHEAD);
 
-	if( (pMMB->id[0]=='M') && (pMMB->id[1]=='M') && (pMMB->id[2]=='B') )
-		pmmb->m_Size=pMMB->next*16;
-	else
-		pmmb->m_Size=pMMB2->MMBSize;
+	if ((pMMB->id[0] == 'M') && (pMMB->id[1] == 'M') && (pMMB->id[2] == 'B')) {
+		pmmb->m_Size = pMMB->next * 16;
+		pmmb->m_type = 1;
+	}
+	else {
+		pmmb->m_Size = pMMB2->MMBSize;
+		pmmb->m_type = 2;
+	}
 	
 	//SMMBHeader (imgID reference by MZB)
 	SMMBHeader *pMMBH = (SMMBHeader*)(p+totalsize);
@@ -771,9 +808,22 @@ void CFFXILandscapeMesh::extractMMB(char *p, unsigned int len, bool isDepend)
 			memcpy(mmblock.textureName, pMMBMH->textureName, 16);
 
 			//Vertex/Normal Info for each model
-			pMMBMH->vertexsize &= 0xffff;
-			mmblock.numVertex=pMMBMH->vertexsize;
-			
+//			pMMBMH->vertexsize &= 0xffff;
+			mmblock.numVertex = pMMBMH->vertexsize;
+			mmblock.blending = pMMBMH->blending;
+//debug
+			switch (pMMBMH->blending)
+			{
+			case 0x00:
+			case 0x1000:
+			case 0x2000:
+			case 0x4000:
+			case 0x8000:
+			case 0xA000:
+				break;
+			default : std::cout << " unknown blendflag: 0x" << std::hex << std::uppercase << pMMBMH->blending << std::dec << std::nouppercase << std::endl;
+			}
+
 			mmblock.vecVertex.clear();	
 			for(int i=0; i<pMMBMH->vertexsize; ++i) {
 				//SMMBBlockVertex / SMMBBlockVertex2
@@ -833,11 +883,22 @@ void CFFXILandscapeMesh::extractMMB(char *p, unsigned int len, bool isDepend)
 				}
 			}
 			else {
+				i2 = 0, i3 = 1;
 				mmblock.drawType = E_TRIANGLE_STRIP;
 				for(int j=0; j<mmblock.numIndices; ++j) {
+					if (j > 2) {
+						i3 = i2;
+						i2 = i1;
+					}
 					i1 = ((*(glm::u16*)(p+totalsize+j*2))&0xffff);
+					//if there r already 3 similiar, remove the last one
+//					if (i1 == i2 && i2 == i3)
+//						continue;
+
 					mmblock.vecIndices.push_back(i1);
 				}
+
+
 				////triangleStrip with special encoding
 				////3 similiar index==STOP, start new triangleStrip with new index
 				////2 similiar index==END triangleStrip, start new triangleStrip with last index
@@ -1039,6 +1100,9 @@ void CFFXILandscapeMesh::extractMZB(char *p, unsigned int len)
 			b92++;
 		}
 	}
+	else {
+		std::cout << "Unknown MZB " << std::endl;
+	}
 return;
 
 	//the following is for collision detection
@@ -1134,6 +1198,16 @@ void CFFXILandscapeMesh::trimSpace(char *des, char *src, int len)
 		for(i=pos1; i<size; ++i)
 			des[i]=0x20;
 	}
+}
+
+int CFFXILandscapeMesh::findMZBIndex(char *id)
+{
+	int index = 0;
+	for (auto it = m_vecMZB.begin(); it != m_vecMZB.end(); ++it,++index) {
+		if (memcmp(id, it->id, 16) == 0)
+			return index;
+	}
+	return -1;
 }
 
 int CFFXILandscapeMesh::findMMBIndex(SMZBBlock100 *in)
@@ -1232,6 +1306,7 @@ bool CFFXILandscapeMesh::lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in)
 	//create a MeshBuffer group to hold the MeshBuffer, since the boundingRect is the same
 	//it will minimize frustum culling time
 	CMeshBufferGroup *pMBG = new CMeshBufferGroup(mzbIndex, mmbIndex);
+
 	//update BoundingRect
 	pMBG->m_origMinBoundRect=pMBG->m_minBoundRect=glm::vec3(pmmb->m_SMMBHeader.x1, pmmb->m_SMMBHeader.y1, pmmb->m_SMMBHeader.z1);
 	pMBG->m_origMaxBoundRect=pMBG->m_maxBoundRect=glm::vec3(pmmb->m_SMMBHeader.x2, pmmb->m_SMMBHeader.y2, pmmb->m_SMMBHeader.z2);
@@ -1373,6 +1448,7 @@ bool CFFXILandscapeMesh::lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in)
 	}
 
 	//for each model, get its Vertex/Normal info
+	unsigned int useAlpha=0, multipler=1;
 	auto modelit=pmmb->m_SMMBVertexIndices.begin();
 	for(; modelit!=pmmb->m_SMMBVertexIndices.end(); ++modelit) {
 		//create a mb for each model
@@ -1380,6 +1456,7 @@ bool CFFXILandscapeMesh::lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in)
 		//set a checker texture as default, if none is available
 		mb->updateTextureID(m_DefaultTextureID);
 		mb->generateFrameBuffer(1);
+		useAlpha = 0;
 
 		//find the textureID
 		for(auto tit=m_vectextureInfo.begin(); tit!=m_vectextureInfo.end(); ++tit) {
@@ -1388,14 +1465,51 @@ bool CFFXILandscapeMesh::lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in)
 				break;
 			}
 		}
+		if (pmmb->m_SMMBHeader.imgID[0] == '_' || modelit->blending & 0x8000)
+			useAlpha = 1;
 
+		multipler = (modelit->blending & 0xF000) >> 12;
+		if (multipler == 0)
+			multipler = 1;
+
+		mb->setBlendFlag(multipler, useAlpha);
 		vecVertices.clear();
 		vecNormal.clear();
 		vecUV.clear();
 		vecColor.clear();
-		//use the indice to lookup MMB vertex and transform MMB vertices
-		for(auto iit=(*modelit).vecIndices.begin(); iit!=(*modelit).vecIndices.end(); ++iit) {
-			smmbv = (*modelit).vecVertex[(*iit)];
+
+		////use the indice to lookup MMB vertex and transform MMB vertices - use DrawArrays()
+		//for(auto iit=(*modelit).vecIndices.begin(); iit!=(*modelit).vecIndices.end(); ++iit) {
+		//	smmbv = (*modelit).vecVertex[(*iit)];
+		//	v.x = smmbv.x;
+		//	v.y = smmbv.y;
+		//	v.z = smmbv.z;
+		//	n.x = smmbv.hx;
+		//	n.y = smmbv.hy;
+		//	n.z = smmbv.hz;
+		//	color.x = (smmbv.color & 0xFF) /255.0f;
+		//	color.y = ((smmbv.color & 0xFF00)>>8) /255.0f;
+		//	color.z = ((smmbv.color & 0xFF0000)>>16) /255.0f;
+		//	color.w = ((smmbv.color & 0xFF000000)>>24) /255.0f;
+		//	uv.x = smmbv.u;
+		//	uv.y = smmbv.v;
+		//	
+		//	if(m_isTransform && in!=nullptr) {
+		//		v.x = v.x * in->fScaleX;
+		//		v.y = v.y * in->fScaleY;
+		//		v.z = v.z * in->fScaleZ;
+		//		v = glm::vec3(m4 * glm::vec4(v,1));
+		//		n = glm::vec3(m4 * glm::vec4(n,0));
+		//	}
+		//	vecVertices.push_back(v);
+		//	vecNormal.push_back(n);
+		//	vecUV.push_back(uv);
+		//	vecColor.push_back(color);
+		//}
+
+		//use index buffer VBO, since MMB does not use multiple uv - use DrawElements()
+		for (auto vit = (*modelit).vecVertex.begin(); vit != (*modelit).vecVertex.end(); ++vit) {
+			smmbv = *vit;
 			v.x = smmbv.x;
 			v.y = smmbv.y;
 			v.z = smmbv.z;
@@ -1408,19 +1522,21 @@ bool CFFXILandscapeMesh::lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in)
 			color.w = ((smmbv.color & 0xFF000000)>>24) /255.0f;
 			uv.x = smmbv.u;
 			uv.y = smmbv.v;
-			
+				
 			if(m_isTransform && in!=nullptr) {
 				v.x = v.x * in->fScaleX;
 				v.y = v.y * in->fScaleY;
 				v.z = v.z * in->fScaleZ;
 				v = glm::vec3(m4 * glm::vec4(v,1));
 				n = glm::vec3(m4 * glm::vec4(n,0));
+				n = glm::normalize(n);
 			}
 			vecVertices.push_back(v);
 			vecNormal.push_back(n);
 			vecUV.push_back(uv);
 			vecColor.push_back(color);
 		}
+
 		mb->updateVertexBuffer(0,vecVertices);
 		mb->updateNormalBuffer(0,vecNormal);
 		mb->updateUVBuffer(vecUV);
@@ -1535,6 +1651,7 @@ unsigned short CFFXILandscapeMesh::limit( unsigned int max, unsigned short val)
 	return val;
 }
 
+
 void CFFXILandscapeMesh::writeMeshInfo(int frame, int mbIndex)
 {
 //	m_meshBuffers[mbIndex]->outputMeshInfo(frame, mbIndex);
@@ -1549,15 +1666,23 @@ void CFFXILandscapeMesh::writeMeshInfo(int frame, int mbIndex)
 	for(int i=0; i<pmmb->m_SMMBVertexIndices.size(); ++i) {
 		sprintf_s(buf,100,"meshBuffer_%d_%d_%d.txt", frame, mbIndex,i);
 		std::ofstream ofs( buf, std::ios::out);
-		ofs << pmmb->m_SMMBVertexIndices[i].vecIndices.size()/3 << std::endl;
+		ofs << "numIndices: " << pmmb->m_SMMBVertexIndices[i].numIndices << "  actual: " << pmmb->m_SMMBVertexIndices[i].vecIndices.size()/3 << std::endl;
 		for(auto it=pmmb->m_SMMBVertexIndices[i].vecIndices.begin(); it!=pmmb->m_SMMBVertexIndices[i].vecIndices.end(); ++it) {
 			ofs << *it << ",";
 			++it;
+			if (it == pmmb->m_SMMBVertexIndices[i].vecIndices.end()) {
+				ofs << std::endl;
+				break;
+			}
 			ofs << *it << ",";
 			++it;
+			if (it == pmmb->m_SMMBVertexIndices[i].vecIndices.end()) {
+				ofs << std::endl;
+				break;
+			}
 			ofs << *it << std::endl;
 		}
-		ofs << pmmb->m_SMMBVertexIndices[i].vecVertex.size() << std::endl;
+		ofs << "numVertex: " << pmmb->m_SMMBVertexIndices[i].vecVertex.size() << std::endl;
 		for(auto it=pmmb->m_SMMBVertexIndices[i].vecVertex.begin(); it!=pmmb->m_SMMBVertexIndices[i].vecVertex.end(); ++it) {
 			str = glm::to_string(glm::vec3((*it).x, (*it).y, (*it).z));
 			str = str.substr(5, str.length()-6);
@@ -1578,3 +1703,4 @@ bool CFFXILandscapeMesh::in_frustum(mat4 M, vec3 p) {
                0 < Pclip.z && 
                Pclip.z < Pclip.w;
 }
+

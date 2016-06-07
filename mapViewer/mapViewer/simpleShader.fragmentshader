@@ -5,6 +5,9 @@ in vec2 UV;
 in vec3 Position_worldspace;
 in vec3 Normal_cameraspace;
 in vec4 fragmentColor;
+in flat int Multipler;
+in flat int useAlpha;
+in vec3 materialColor;
 
 // Ouput data
 out vec4 color;
@@ -15,10 +18,16 @@ uniform mat4 MV;
 
 void main(){
 	vec4 myRGBA= texture2D(myTextureSampler, UV).rgba;
-	
-	color.rgb= clamp(myRGBA.rgb*fragmentColor.rgb*2.0, 0.0, 1.0);
-	color.a = myRGBA.a + fragmentColor.a;
-	if(color.a < 0.1)
-		discard;
+//	vec3 MaterialAmbientColor = vec3(0.1,0.1,0.1) * materialColor;
 
+	color.rgb = clamp(myRGBA.rgb*fragmentColor.rgb,0.0,1.0);
+
+	if(useAlpha) {
+		color.a = clamp(myRGBA.a*fragmentColor.a*Multipler,0.0,1.0);
+	}
+	else
+		color.a = 1.0;
+
+	if(color.a <0.1)
+		discard;
 }

@@ -25,11 +25,11 @@ unsigned int COpenGLDriver::createTexture(glm::u32 width, glm::u32 height, glm::
 {
 	GLuint textureID;
 	glGenTextures(1, &textureID);
-
+	
 	// "Bind" the newly created texture : all future texture functions will modify this texture
 	glBindTexture(GL_TEXTURE_2D, textureID);
 //	glPixelStorei(GL_UNPACK_ALIGNMENT,1);	
-	
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -38,7 +38,7 @@ unsigned int COpenGLDriver::createTexture(glm::u32 width, glm::u32 height, glm::
 //	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 //	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0 );
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pImg);
-
+	
 	return textureID;
 
 }
@@ -134,20 +134,15 @@ void COpenGLDriver::draw(int frame, IMeshBuffer *mb)
 		glDisableVertexAttribArray(2);
 }
 
-void COpenGLDriver::assignGLBufferID(GLuint vb, GLuint uv, GLuint nor)
+void COpenGLDriver::assignGLBufferID()
 {
-	vertexbuffer = vb;
-	uvbuffer = uv;
-	normalbuffer = nor;
-	
-	//Create default vertex array
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
+	glGenBuffers(1, &vertexbuffer);
+	glGenBuffers(1, &uvbuffer);
+	glGenBuffers(1, &normalbuffer);
 }
 
 void COpenGLDriver::cleanUp()
 {
-	glDeleteVertexArrays(1, &vao);
 	glDeleteBuffers(1, &vertexbuffer);
 	glDeleteBuffers(1, &uvbuffer);
 	glDeleteBuffers(1, &normalbuffer);

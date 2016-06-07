@@ -31,7 +31,7 @@ public:
 	CLOTHVERTEX1* transformVertexC1(int k, CLOTHVERTEX1 *c1, WORD flip, bool isIndirect);
 	CLOTHVERTEX2* transformVertexC2(int k, CLOTHVERTEX2 *c2, WORD flip, bool isIndirect);
 
-	ofstream ofs;
+	ofstream ofs, ofs2;
 	int cur_mesh;
 	int m_fileNo;
 

@@ -193,7 +193,6 @@ myRGBA CDDSBlock::BC2getColor(u16 a, myRGBA c0, myRGBA c1, myRGBA c2, myRGBA c3,
 	myRGBA rgba;
 	rgba.a=a;
 	rgba.a = rgba.a << 4;
-//	rgba.a=0xFF;
 	switch(pixel)
 	{
 	case 0:		rgba.r=c0.r; rgba.g=c0.g; rgba.b=c0.b;
@@ -574,6 +573,7 @@ myRGBA CDDSBlock::BC3getColor(SAlpha sa, SColor sc, u8 apos, u8 cpos)
 		break;
 	}
 //rgba.a = 255;
+	rgba.a = 255-rgba.a;
 	return rgba;
 }
 
@@ -623,7 +623,7 @@ void CDDS2Bmp::convert2BMP(u8 *p, u32 width, u32 height, u32 ddsSize, u32 pixelW
 				break;
 			case '3':	cdds.BC2decodeBlock(mem, image,i,j);
 				break;
-			case '5':	cdds.BC3decodeBlock(mem, image,i,j);
+			case '5':	cdds.BC3decodeBlock(mem, image, i, j);
 				break;
 			}
 			off += blockSize;

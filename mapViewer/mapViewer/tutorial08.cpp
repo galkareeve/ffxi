@@ -4,8 +4,8 @@
 #include <vector>
 
 #pragma comment(lib,"opengl32.lib")
-#pragma comment(lib,"glfw3.lib")
-#pragma comment(lib,"glew32.lib")
+//#pragma comment(lib,"glfw3.lib")
+//#pragma comment(lib,"glew32.lib")
 
 #define GLFW_DLL
 
@@ -13,7 +13,7 @@
 #include <GL/glew.h>
 
 // Include GLFW
-#include <glfw3.h>
+#include <glfw/glfw3.h>
 GLFWwindow* window;
 
 // Include GLM
@@ -88,14 +88,17 @@ int main( int argc, char** argv )
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
 	// Accept fragment if it closer to the camera than the former one
-	glDepthFunc(GL_LESS); 
+	glDepthFunc(GL_LEQUAL); 
+
+	glShadeModel(GL_SMOOTH);
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 	// Cull triangles which normal is not towards the camera
 //	glEnable(GL_CULL_FACE);
 
-//	GLuint VertexArrayID;
-//	glGenVertexArrays(1, &VertexArrayID);
-//	glBindVertexArray(VertexArrayID);
+	GLuint VertexArrayID;
+	glGenVertexArrays(1, &VertexArrayID);
+	glBindVertexArray(VertexArrayID);
 
 	// Create and compile our GLSL program from the shaders
 //	GLuint programID = LoadShaders( "StandardShading.vertexshader", "StandardShading.fragmentshader" );
@@ -153,9 +156,12 @@ int main( int argc, char** argv )
 	glUseProgram(programID);
 //	GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
 
-//	glFrontFace(GL_CW);
+	glFrontFace(GL_CW);
+//	glDisable(GL_BLEND);
 	// Enable blending
-//	glEnable(GL_BLEND);
+//	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ZERO);
 //	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 //	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	char title[100];
@@ -166,7 +172,7 @@ int main( int argc, char** argv )
 	do{
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	
 		// Use our shader
 		glUseProgram(programID);
 
@@ -186,6 +192,18 @@ int main( int argc, char** argv )
 			if(glfwGetKey(window,GLFW_KEY_J) == GLFW_RELEASE) {
 				pnode->setCurrentMMB(pnode->getCurrentMMB()+10);
 				std::cout << ((pnode->isMZB())? "MZB":"MMB") << pnode->getCurrentMMB() << std::endl;
+			}
+		}
+		else if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
+			if (glfwGetKey(window, GLFW_KEY_V) == GLFW_RELEASE) {
+				pnode->nextMMBModel();
+				std::cout << ((pnode->isMZB()) ? "MZB" : "MMB") << pnode->getCurrentMMB() << " Model: " << (pnode->getMMBModelInfo()+1) << std::endl;
+			}
+		}
+		else if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
+			if (glfwGetKey(window, GLFW_KEY_X) == GLFW_RELEASE) {
+				pnode->toggleMMBModelInclusive();
+				std::cout << ((pnode->isMMBModelInclusive()) ? "Model Inclusive" : "Model Exclusive") << std::endl;
 			}
 		}
 		else if (glfwGetKey( window, GLFW_KEY_M ) == GLFW_PRESS){
@@ -212,10 +230,16 @@ int main( int argc, char** argv )
 				std::cout << "MMB Transform: " << ((pFFXLandscapeImesh->isMMBTransform())? "yes":"no") << std::endl;
 			}
 		}
-		else if (glfwGetKey( window, GLFW_KEY_X ) == GLFW_PRESS){
-			if(glfwGetKey(window,GLFW_KEY_X) == GLFW_RELEASE) {
-				pnode->wirteMeshBuffer();
-				std::cout << "writeMeshInfo: " << pnode->getCurrentMMB() << std::endl;
+		//else if (glfwGetKey( window, GLFW_KEY_X ) == GLFW_PRESS){
+		//	if(glfwGetKey(window,GLFW_KEY_X) == GLFW_RELEASE) {
+		//		pnode->wirteMeshBuffer();
+		//		std::cout << "writeMeshInfo: " << pnode->getCurrentMMB() << std::endl;
+		//	}
+		//}
+		else if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_RELEASE) {
+				pDriver->toggleWireframe();
+				std::cout << "Wireframe: " << ((pDriver->isWireframe()) ? "yes" : "no") << std::endl;
 			}
 		}
 		else if (glfwGetKey( window, GLFW_KEY_C ) == GLFW_PRESS){
@@ -266,7 +290,8 @@ int main( int argc, char** argv )
 					pFFXLandscapeImesh->drop();
 					pnode->setPosition(glm::vec3(0,0,0));
 					pnode->setCurrentFrame(0);
-					pFrustum->setFrustumPos(pnode->getExtend());
+					//pFrustum->setFrustumPos(pnode->getExtend());
+					pFrustum->setFrustumPos(0.0);
 					std::cout << "Loaded landscapeMesh: " << mapNo << std::endl;
 				}
 			}
@@ -285,7 +310,8 @@ int main( int argc, char** argv )
 					pFFXLandscapeImesh->drop();
 					pnode->setPosition(glm::vec3(0,0,0));
 					pnode->setCurrentFrame(0);
-					pFrustum->setFrustumPos(pnode->getExtend());
+					//pFrustum->setFrustumPos(pnode->getExtend());
+					pFrustum->setFrustumPos(0.0);
 					std::cout << "Loaded landscapeMesh: " << mapNo << std::endl;
 				}
 			}
@@ -319,7 +345,7 @@ int main( int argc, char** argv )
 
 	// Cleanup VBO and shader
 	pDriver->cleanUp();
-//	glDeleteVertexArrays(1, &VertexArrayID);
+	glDeleteVertexArrays(1, &VertexArrayID);
 	delete pDriver;
 	delete pSceneMgr;
 	delete pFrustum;

@@ -9,11 +9,11 @@ public:
 	COpenGLDriver(void);
 	virtual ~COpenGLDriver(void);
 
-	unsigned int createTexture(unsigned int width, unsigned int height, unsigned int mipMapCount, unsigned char *pImg);
+	unsigned int createTexture(glm::u32 width, glm::u32 height, glm::u32 mipMapCount, glm::u8 *pImg);
 	void draw(int frame, IMeshBuffer *mb);
 	void setProgramID( GLuint pid );
 	void setShaderTextureID(GLuint sid);
-	void assignGLBufferID(GLuint vb, GLuint uv, GLuint nor);
+	void assignGLBufferID();
 	void cleanUp();
 
 	void createMatrixHandler();
@@ -25,8 +25,7 @@ protected:
 	GLuint vertexbuffer;
 	GLuint uvbuffer;
 	GLuint normalbuffer;
-	GLuint vao;
-	
+
 	GLuint MatrixID;
 	GLuint ViewMatrixID;
 	GLuint ModelMatrixID;

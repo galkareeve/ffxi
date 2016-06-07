@@ -27,7 +27,6 @@ public:
 	//for frustum culling
 	glm::vec3 m_origMinBoundRect;
 	glm::vec3 m_origMaxBoundRect;
-//	glm::mat4 m_inverseMatrix;
 
 	std::vector<IMeshBuffer*> m_meshBuffers;
 };

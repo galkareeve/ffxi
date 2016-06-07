@@ -9,6 +9,7 @@
 
 #define PARTS 10
 
+#pragma pack(push,4)
 struct SVertexNormal {
 	glm::vec3 vertex;
 	glm::vec3 normal;
@@ -90,7 +91,7 @@ struct SBoneMatrix {
 	glm::vec3 skinLocalTranslation;	//bindpos multiply with animationTranslation
 	std::vector<int> child;
 };
-
+#pragma pack(pop)
 
 /*
 Every FFXIPart is created when encounter addVertex (twice if needflip, mirror side)
@@ -109,8 +110,9 @@ public:
 
 	//ffxi vertices contain 4 member
 	int getBindPosVertexCount() { return m_vecBindPosVertices.size(); }
-	void addBindPosVertex(SBindPosVertex bv) {
-		m_vecBindPosVertices.push_back(bv);
+	void addBindPosVertex(const SBindPosVertex bv) {
+		SBindPosVertex bpv = bv;
+		m_vecBindPosVertices.push_back(bpv);
 	}
 	void updateBindPosVertex(int i, SBindPosVertex bv) {
 		m_vecBindPosVertices[i] = bv;

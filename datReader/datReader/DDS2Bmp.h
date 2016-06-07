@@ -187,19 +187,21 @@ public:
 	CDDSBlock(int w, int h);
 	~CDDSBlock(void);
 
-	void BC1decodeBlock(char *src, char *&des, int brow, int bcol);
+	void BC1decodeBlock(char *src, char *&des, int brow, int bcol, bool outAlpha=false);
 	void BC1decodeColor(BYTE a, myRGBA c0, myRGBA c1, myRGBA c2, myRGBA c3, pRow r, int col, int row, char *&des);
 	myRGBA BC1getColor(BYTE sa, myRGBA c0, myRGBA c1, myRGBA c2, myRGBA c3, BYTE pixel);
 
-	void BC2decodeBlock(char *src, char *&des, int brow, int bcol);
+	void BC2decodeBlock(char *src, char *&des, int brow, int bcol, bool outAlpha=false);
 	void BC2decodeColor(pAlpha a, myRGBA c0, myRGBA c1, myRGBA c2, myRGBA c3, pRow r, int col, int row, char *&des);
 	myRGBA BC2getColor(WORD a, myRGBA c0, myRGBA c1, myRGBA c2, myRGBA c3, BYTE pixel);
 
-	void BC3decodeBlock(char *src, char *&des, int brow, int bcol);
+	void BC3decodeBlock(char *src, char *&des, int brow, int bcol, bool outAlpha=false);
 	myRGBA BC3getColor(SAlpha sa, SColor sc, BYTE apos, BYTE cpos);
 
+	void setFileStream(std::ofstream *fs);
 	int m_width;
 	int m_height;
+	std::ofstream *m_pfs;
 };
 
 class CDDS2Bmp
@@ -211,5 +213,10 @@ public:
 	void convert2BMP(char *p, unsigned int width, unsigned int height, unsigned int ddsSize, unsigned int pixelWidth, char ddsType, char *fn, char *&out);
 	std::string fixFileName(char *fn);
 	void testCreateBMP(char *p, int width, int height, char *fn);
+
+	void setOutputAlpha(bool f);
+
+	bool m_outputAlpha;
+	std::ofstream writeFile;
 };
 

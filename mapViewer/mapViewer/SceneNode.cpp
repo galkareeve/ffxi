@@ -6,8 +6,6 @@
 
 #include <glm/gtc/matrix_access.hpp>
 
-//#include <glfw3.h>
-//extern GLFWwindow* window;
 CSceneNode::CSceneNode(ISceneNode *parent, CSceneManager *mgr) : ISceneNode(parent,mgr)
 {
 	m_pMesh=nullptr;
@@ -44,6 +42,8 @@ void CSceneNode::draw(IDriver *dr, glm::mat4 &ProjectionMatrix, glm::mat4 &ViewM
 	int i,mbc,gc = m_pMesh->getMeshBufferGroupCount();
 	for(i=0; i<gc; ++i) {
 		CMeshBufferGroup *pMBG=m_pMesh->getMeshBufferGroup(i);
+		if (pMBG == nullptr)
+			continue;
 		mbc=pMBG->getMeshBufferCount();
 		for(int j=0; j<mbc; ++j) {
 			IMeshBuffer *mb = pMBG->getMeshBuffer(j);

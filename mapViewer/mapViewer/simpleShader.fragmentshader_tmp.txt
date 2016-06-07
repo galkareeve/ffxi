@@ -1,0 +1,74 @@
+#version 330 core
+
+// Interpolated values from the vertex shaders
+in vec2 UV;
+in vec3 Position_worldspace;
+in vec3 Normal_cameraspace;
+in vec4 fragmentColor;
+in flat int BlendFlg;
+in flat int useAlpha;
+in vec3 materialColor;
+
+// Ouput data
+out vec4 color;
+
+// Values that stay constant for the whole mesh.
+uniform sampler2D myTextureSampler;
+uniform mat4 MV;
+
+void main(){
+	vec4 myRGBA= texture2D(myTextureSampler, UV).rgba;
+	vec3 MaterialAmbientColor = vec3(0.1,0.1,0.1) * materialColor;
+
+//	color.rgb = clamp(myRGBA.rgb*fragmentColor.rgb,0.0,1.0);
+	color.rgb = clamp(myRGBA.rgb*fragmentColor.rgb*1.5,0.0,1.0);
+	if(BlendFlg==0) {
+		//either have black for transparent or no transparent
+//		if((myRGBA.r == 0.0) && (myRGBA.g ==0.0) && (myRGBA.b ==0.0)) {
+		if(useAlpha) {
+			color.a = clamp(myRGBA.a*fragmentColor.a,0.0,1.0);
+		}
+		else {
+			if((myRGBA.r==0.0) && (myRGBA.g==0.0) && (myRGBA.b==0.0))
+				color.a = clamp(myRGBA.a*fragmentColor.a,0.0,1.0);
+			else
+				color.a = 1.0;
+		}
+	}
+	else if(BlendFlg==1) {
+		//either have black or alpha for transparency
+//		if((myRGBA.r==0.0) && (myRGBA.g==0.0) && (myRGBA.b==0.0)) {
+		if(useAlpha) {
+			color.a = clamp(myRGBA.a*fragmentColor.a,0.0,1.0);			
+		}
+		else {
+			if((myRGBA.r==0.0) && (myRGBA.g==0.0) && (myRGBA.b==0.0))
+				color.a = clamp(myRGBA.a*fragmentColor.a,0.0,1.0);
+			else
+				color.a = 1.0;
+		}
+	}
+	else if(BlendFlg==2) {
+		//only alpha
+		if(useAlpha) {
+			color.a = clamp(myRGBA.a*fragmentColor.a*2,0.0,1.0);
+		}
+		else {
+			if((myRGBA.r==0.0) && (myRGBA.g==0.0) && (myRGBA.b==0.0))
+				color.a = clamp(myRGBA.a*fragmentColor.a*2,0.0,1.0);
+			else
+				color.a = 1.0;
+		}
+	}
+	else if(BlendFlg==4) {
+		color.a = clamp(myRGBA.a*fragmentColor.a*4,0.0,1.0);
+	}
+	else if(BlendFlg==8) {
+		color.a = clamp(myRGBA.a*fragmentColor.a*8,0.0,1.0);
+	}
+	else if(BlendFlg==10) {
+		color.a = clamp(myRGBA.a*fragmentColor.a*10,0.0,1.0);
+	}	
+	if(color.a <0.1)
+		discard;
+}

@@ -18,12 +18,22 @@ struct SMMBHEAD {
 	char unk[9];
 };
 
+//struct SMMBHEAD2 {
+//	unsigned int MMBSize:24;
+//	unsigned int d1:8;
+//	unsigned short d3:8;
+//	unsigned short d4:8;
+//	char unk2[2];		//FF FF
+//	char name[8];
+//};
+
 struct SMMBHEAD2 {
-	unsigned int MMBSize:24;
-	unsigned int d1:8;
-	unsigned short d3:8;
-	unsigned short d4:8;
-	char unk2[2];		//FF FF
+	unsigned int MMBSize : 24;
+	unsigned int d1 : 8;
+	unsigned short d3 : 8;			//vertice stride (SMMBBlockVertex or SMMBBlockVertex2)
+	unsigned short d4 : 8;			//d4, d5, d6 seems to be global across all Dat
+	unsigned short d5 : 8;			//value is always the same (eg. moonshpere is always 240, 0, 0)
+	unsigned short d6 : 8;			//d4, d5 incr the same as well
 	char name[8];
 };
 
@@ -92,7 +102,8 @@ struct SLandscapeTextureInfo {
 
 struct SMZBHeader {
 	char id[4];
-	unsigned int totalRecord100;
+	unsigned int totalRecord100:24;
+	unsigned int R100Flg:8;
 	unsigned int offsetHeader2;
 	unsigned int d1:8;
 	unsigned int d2:8;
@@ -105,7 +116,8 @@ struct SMZBHeader {
 };
 
 struct SMZBHeader2 {
-	unsigned int totalRecord92;
+	unsigned int totalRecord92:24;
+	unsigned int R92Flg : 8;
 	unsigned int offsetBlock92;
 	unsigned int totalBlock16;
 	unsigned int offsetBlock16;
@@ -211,7 +223,8 @@ struct SMMBBlockHeader {
 //part of SMMBVertexIndices, used to get the vertexsize
 struct SMMBModelHeader {
 	char textureName[16];
-	unsigned int vertexsize;			//No of SMMBBlockVertex
+	unsigned short vertexsize;			//No of SMMBBlockVertex
+	unsigned short blending;
 };
 
 struct SMMBBlockVertex {
@@ -232,7 +245,8 @@ struct SMMBBlockVertex2 {
 struct SMMBVertexIndices {
 	GL_DRAWTYPE drawType;
 	char textureName[16];
-	unsigned int numVertex;
+	unsigned short numVertex;
+	unsigned short blending;
 	std::vector<SMMBBlockVertex2> vecVertex;	//some model with [numFace==0 or d3=2], uses SMMBBlockVertex2 structure
 	unsigned int numIndices;					//numIndices is the original num of index in the dat before extraction
 	std::vector<glm::u16> vecIndices;
@@ -244,6 +258,7 @@ public:
 	CMMB(void){ m_Size=0;};
 	~CMMB(void){};
 
+	unsigned int m_type;				//mmb1 or mmb2
 	unsigned int m_Size;				//total length
 	SMMBHeader m_SMMBHeader;			//contain the imgID
 	std::vector<SMMBVertexIndices> m_SMMBVertexIndices;
@@ -269,10 +284,10 @@ public:
 	void getMeshBufferGroup(std::vector<CMeshBufferGroup*> &out) {out=m_meshBufferGroup;}
 	void addMeshBufferGroup(CMeshBufferGroup *in) {m_meshBufferGroup.push_back(in); };
 	int getMeshBufferGroupCount() { return m_meshBufferGroup.size(); };
-	void refreshMeshBufferGroup(int i, bool isMZB);
+	void refreshMeshBufferGroup( int i, bool isMZB);
 	
 	int BitCount(unsigned char x);
-	std::string extractImageName(char *p, glm::u32 &width, glm::u32 &height, glm::u8 *& ppImage);
+	SLandscapeTextureInfo extractImageName(char *p, glm::u32 &width, glm::u32 &height, glm::u8 *& ppImage);
 	void toggleMMBTransform();
 	bool isMMBTransform() { return m_isTransform; }
 	int getB100count() { return m_vecMZB.size(); }
@@ -304,6 +319,7 @@ private:
 	void extractMMB(char *p, unsigned int len, bool isDepend=false);
 	void extractMZB(char *p, unsigned int len);
 	
+	int findMZBIndex(char *id);
 	int findMMBIndex(SMZBBlock100 *in);
 	bool lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in);
 //	bool lookupMMB(SMZBBlock100 *in);

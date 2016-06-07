@@ -11,7 +11,7 @@
 using namespace std;
 using namespace glm;
 
-char ffxidir[512]="D:\\Program Files\\PlayOnline\\SquareEnix\\FINAL FANTASY XI\\";
+char ffxidir[512]="E:\\Program Files\\PlayOnline\\SquareEnix\\FINAL FANTASY XI\\";
 
 //void LocateFFXIDataFolder()
 //{
@@ -239,6 +239,9 @@ void CFFXIMesh::prepareFrameBuffer()
 //this is only called once to animate all the frameBuffer
 bool CFFXIMesh::animate(int frame)
 {
+	if (m_meshBuffers.empty())
+		return false;
+
 	//check meshBuffer[0], since all parts are animated together for each frame
 	if(m_meshBuffers[0]->isFrameBufferLoaded(frame))
 		return true;

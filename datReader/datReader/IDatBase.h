@@ -141,14 +141,16 @@ public:
 		pData = pdat;
 		return pData;
 	}
+
 	LPSTR NextData(DATHEAD *phd)
 	{
-		if(!pData) return NULL;
+		if (!pData) return NULL;
 		*phd = *(DATHEAD *)pData;
-		int next = phd->next;
-		if( next<=0 ) return NULL;
-		if( pdat+dwSize<=pData+next*16 ) return NULL;
-		pData += next*16;
+		unsigned int next = phd->next;
+		if (next <= 0) return NULL;
+		next = (next & 0x7ffff) * 16;
+		if (pdat + dwSize <= pData + next) return NULL;
+		pData += next;
 		*phd = *(DATHEAD *)pData;
 		return pData;
 	}

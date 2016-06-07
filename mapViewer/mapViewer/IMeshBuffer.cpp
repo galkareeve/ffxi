@@ -6,6 +6,8 @@ IMeshBuffer::IMeshBuffer(GL_DRAWTYPE dt)
 {
 	m_gldrawType=dt;
 	m_textureID=0;
+	m_multipler = 0;
+	m_useAlpha = 0;
 }
 
 IMeshBuffer::~IMeshBuffer(void)

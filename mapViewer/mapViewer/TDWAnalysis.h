@@ -1,6 +1,6 @@
 //------------------------------------------------------------------------------
 //  File: TDWAnalysis.h
-//  Desc: ffxiï½µï¾„ï½½ç°§î“œï½¥ï¾”ï½ª     
+//  Desc: ffxiµÄ½âÎöµ¥Ôª     
 //  Revision history:
 //      * 2007/08/10 Created by Muzisoft05@163.com.
 //
@@ -410,7 +410,7 @@ typedef struct
 typedef struct{
   char  ver;     //0x00
   char  nazo;    //0x01
-  unsigned short  type;    //0x02 &7f==0ãƒ¢ãƒ‡ãƒ« 1=ã‚¯ãƒ­ã‚¹
+  unsigned short  type;    //0x02 &7f==0ƒ‚ƒfƒ‹ 1=ƒNƒƒX
   unsigned short  flip;    //0x04 0==OFF  ON
 
   unsigned int offsetPoly;       //0x06
@@ -444,8 +444,8 @@ typedef struct{
   unsigned short  frame;
   float speed;
   union{
-    float f[];   //waringå‡ºã‚‹ã‘ã©è¨±ã—ã¦ã­
-    DAT2B dat[]; //waringå‡ºã‚‹ã‘ã©è¨±ã—ã¦ã­
+    float f[];   //waringo‚é‚¯‚Ç‹–‚µ‚Ä‚Ë
+    DAT2B dat[]; //waringo‚é‚¯‚Ç‹–‚µ‚Ä‚Ë
   };
 } DAT2BHeader;
 
@@ -473,7 +473,7 @@ typedef struct
 } BONE;
 typedef struct 
 {
-  unsigned short no;             //ãƒœãƒ¼ãƒ³ç•ªå·ã‚’æŒ‡ã—ã¦ã‚‹ãƒƒã½ã„ æŒ‡å®šã®ãƒœãƒ¼ãƒ³ã«ä¾å­˜ã—ã¦ã„ã‚‹ã£ã¦è¨€ã†ã“ã¨ï¼Ÿ
+  unsigned short no;             //ƒ{[ƒ“”Ô†‚ðŽw‚µ‚Ä‚éƒb‚Û‚¢ Žw’è‚Ìƒ{[ƒ“‚ÉˆË‘¶‚µ‚Ä‚¢‚é‚Á‚ÄŒ¾‚¤‚±‚ÆH
   float a,b,c,d,e,f;
 } BONE2;
 
@@ -512,10 +512,10 @@ typedef struct
 
 typedef struct _D3DTEXVERTEX
 {
-  float x,y,z;     //åº§æ¨™
-  float hx,hy,hz;  //æ³•ç·šãƒ™ã‚¯ãƒˆãƒ«
-  unsigned int color;     //è‰²
-  float tu,tv;     // UVåº§æ¨™
+  float x,y,z;     //À•W
+  float hx,hy,hz;  //–@üƒxƒNƒgƒ‹
+  unsigned int color;     //F
+  float tu,tv;     // UVÀ•W
 } D3DTEXVERTEX;
 
 //#define D3DFVF_TEXVERTEX (D3DFVF_XYZ|D3DFVF_DIFFUSE|D3DFVF_NORMAL|D3DFVF_TEX1) 
@@ -527,17 +527,17 @@ inline float DEGtoRAD(float angle)
 
 typedef struct
 {
-  float x,y,z;     //åº§æ¨™
-  float hx,hy,hz;  //æ³•ç·šãƒ™ã‚¯ãƒˆãƒ«
+  float x,y,z;     //À•W
+  float hx,hy,hz;  //–@üƒxƒNƒgƒ‹
 } MODELVERTEX1;
 
-typedef struct  //ã“ã‚Œã§ç¢ºå®š
+typedef struct  //‚±‚ê‚ÅŠm’è
 {
   float x1,x2,y1,y2,z1,z2;
   float w1,w2;
-  float hx1,hx2;  //æ³•ç·šãƒ™ã‚¯ãƒˆãƒ«
-  float hy1,hy2;  //æ³•ç·šãƒ™ã‚¯ãƒˆãƒ«
-  float hz1,hz2;  //æ³•ç·šãƒ™ã‚¯ãƒˆãƒ«
+  float hx1,hx2;  //–@üƒxƒNƒgƒ‹
+  float hy1,hy2;  //–@üƒxƒNƒgƒ‹
+  float hz1,hz2;  //–@üƒxƒNƒgƒ‹
 } MODELVERTEX2;
 
 typedef struct 
@@ -552,7 +552,7 @@ typedef struct
 
 typedef struct
 {
-  float x,y,z;     //åº§æ¨™
+  float x,y,z;     //À•W
 } CLOTHVERTEX1;
 
 typedef struct
@@ -631,18 +631,31 @@ public:
 		pData = pdat;
 		return pData;
 	}
+	//char* NextData(DATHEAD *phd)
+	//{
+	//	if(!pData) return NULL;
+	//	*phd = *(DATHEAD *)pData;
+	//	int next = phd->next;
+	//	if( next<=0 ) return NULL;
+	//	if( pdat+dwSize<=pData+next*16 ) return NULL;
+	//	pData += next*16;
+	//	*phd = *(DATHEAD *)pData;
+	//	return pData;
+	//}
+
 	char* NextData(DATHEAD *phd)
 	{
-		if(!pData) return NULL;
+		if (!pData) return NULL;
 		*phd = *(DATHEAD *)pData;
 		unsigned int next = phd->next;
-		if( next<=0 ) return NULL;
+		if (next <= 0) return NULL;
 		next = (next & 0x7ffff) * 16;
-		if( pdat+dwSize<=pData+next ) return NULL;
+		if (pdat + dwSize <= pData + next) return NULL;
 		pData += next;
 		*phd = *(DATHEAD *)pData;
 		return pData;
 	}
+
 	bool Free(void)
 	{
 		dwSize = 0;

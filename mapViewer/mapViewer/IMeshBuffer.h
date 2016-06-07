@@ -40,11 +40,16 @@ public:
 	void updateUVBuffer(std::vector<glm::vec2> &uv);
 	void updateColorBuffer(std::vector<glm::vec4> &color);
 //	void updateBuffer(std::vector<glm::vec3> &vert, std::vector<glm::vec3> &normal, std::vector<glm::u16> &indices, std::vector<glm::vec2> &uv);
+	void setBlendFlag(unsigned int bflg, unsigned int useAlpha) { m_multipler = bflg; m_useAlpha = useAlpha; };
+	unsigned int getMultipler() { return m_multipler; };
+	unsigned int isUseAlpha() { return m_useAlpha; };
 
 	void outputMeshInfo(int frame, int mbIndex);
 
 	GL_DRAWTYPE m_gldrawType;
 	unsigned int m_textureID;
+	unsigned int m_multipler;
+	unsigned int m_useAlpha;
 
 	std::vector<glm::u16> m_vecIndices;
 	std::vector<glm::vec2> m_vecUV;

@@ -1,0 +1,5 @@
+best first vertexPos for indices: 0 (59 0 58) @ 11, sequence:1
+best first vertexPos for indices: 2 (2 0 61) @ 11, sequence:1
+best first vertexPos for indices: 4 (3 6 4) @ 13, sequence:1
+best first vertexPos for indices: 5 (5 58 0) @ 7, sequence:1
+best first vertexPos for indices: 6 (0 6 5) @ 8, sequence:1

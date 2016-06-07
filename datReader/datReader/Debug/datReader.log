@@ -1,0 +1,41 @@
+﻿Build started 1/6/2016 3:52:46 PM.
+     1>Project "D:\c_project\irrlichit\datReader\datReader\datReader.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         E:\Program Files\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ID:\c_project\irrlichit\datReader\packages\nupengl.core.0.1.0.1\build\native\../..//build/native/include/ /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Yu"stdafx.h" /Fp"Debug\datReader.pch" /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt DDS2Bmp.cpp
+         DDS2Bmp.cpp
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(43): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(44): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(45): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(47): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(48): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(49): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(52): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(53): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(54): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(146): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(147): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(148): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(150): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(151): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(152): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(118): warning C4101: 'color3': unreferenced local variable
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(118): warning C4101: 'color2': unreferenced local variable
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(314): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(315): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(316): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(318): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(319): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+     1>d:\c_project\irrlichit\datreader\datreader\dds2bmp.cpp(320): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+       Link:
+         E:\Program Files\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\c_project\irrlichit\datReader\Debug\datReader.exe" /INCREMENTAL /NOLOGO D:\c_project\irrlichit\datReader\packages\nupengl.core.0.1.0.1\build\native\../..//build/native/lib/Win32\glew32.lib D:\c_project\irrlichit\datReader\packages\nupengl.core.0.1.0.1\build\native\../..//build/native/lib/Win32\glfw3dll.lib D:\c_project\irrlichit\datReader\packages\nupengl.core.0.1.0.1\build\native\../..//build/native/lib/Win32\freeglut.lib glew32.lib freeglut.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"D:\c_project\irrlichit\datReader\Debug\datReader.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\c_project\irrlichit\datReader\Debug\datReader.lib" /MACHINE:X86 Debug\Dat29.obj
+         Debug\datReader.obj
+         Debug\DDS2Bmp.obj
+         Debug\DDSLoader.obj
+         Debug\MyMathLib.obj
+         Debug\stdafx.obj
+         datReader.vcxproj -> D:\c_project\irrlichit\datReader\Debug\datReader.exe
+     1>Done Building Project "D:\c_project\irrlichit\datReader\datReader\datReader.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.43

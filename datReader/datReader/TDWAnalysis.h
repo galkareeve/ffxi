@@ -648,11 +648,10 @@ public:
 	{
 		if(!pData) return NULL;
 		*phd = *(DATHEAD *)pData;
-		unsigned int next = phd->next;
+		int next = phd->next;
 		if( next<=0 ) return NULL;
-		next = (next & 0x7ffff) * 16;
-		if( pdat+dwSize<=pData+next ) return NULL;
-		pData += next;
+		if( pdat+dwSize<=pData+next*16 ) return NULL;
+		pData += next*16;
 		*phd = *(DATHEAD *)pData;
 		return pData;
 	}

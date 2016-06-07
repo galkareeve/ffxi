@@ -6,7 +6,7 @@
 #define WRITE_RAW_DECODE_MZB	0
 #define WRITE_RAW_DECODE_MMB	0
 #define PARTIAL_MMB	1
-#define COUNT_W		7
+#define COUNT_W		25
 
 #define PARSE_MZB	1
 #define PARSE_MMB	1
@@ -21,6 +21,8 @@
 #define OUTPUT_CHAR_MESH_BLENDER	0
 #define OUTPUT_COLLISION_BLENDER	0
 #define OUTPUT_MMB_BLENDER		0
+
+#define	WRITE_MMB_RGB		1
 
 CDatLoader::CDatLoader(void)
 {
@@ -70,8 +72,18 @@ bool CDatLoader::loadDat(int fno)
 		cout << "unable to open outfile" << endl;
 		return false;
 	}
+
+	if (WRITE_MMB_RGB) {
+		sprintf_s(buf, 50, "%d_MMBRGB.txt", fno);
+		str.assign(buf);
+		ofs2.open(str.c_str(), std::ofstream::out);
+		if (!ofs) {
+			cout << "unable to open MMB_RGB" << endl;
+			return false;
+		}
+	}
 	bool isValidMZB=false;
-	unsigned int len,mzb=0,mmb=0,Z5=0,Z7=0,Z61=0,Z25=0,ZUNK=0;
+	unsigned int len,mzb=0,mmb=0,Z5=0,Z7=0,Z61=0,Z25=0,Z31=0,ZUNK=0;
 	DATHEAD hd;
 	ofstream datout;
 		char *p, *start=f.FistData(&hd);
@@ -86,7 +98,7 @@ bool CDatLoader::loadDat(int fno)
 			switch (type)
 			{
 				case 0x1c:  //28 MZB
-						ofs << mzb << ")  offset: " << p-start << " MZB " << iname << " type: " << hd.type << " size: " << len << endl;
+						ofs << mzb << ")  offset: " << p-start << " MZB " << iname << " type: " << hd.type << " shadow: " << hd.is_shadow << " extract: " << hd.is_extracted << " virtual: " << hd.is_virtual << " ver: " << hd.ver_num << " size: " << len << endl;
 						if(PARSE_MZB) {
 							cout << "parsing MZB" << endl;
 							isValidMZB = decode_mzb((BYTE*)(p+16), len);
@@ -100,7 +112,10 @@ bool CDatLoader::loadDat(int fno)
 				break;
 				case 0x2e:  //46 MMB
 	
-						ofs << mmb << ")  offset: " << p-start << " MMB " << iname << " type: " << hd.type << " size: " << len << endl;
+						ofs << mmb << ")  offset: " << p-start << " MMB " << iname << " type: " << hd.type << " shadow: " << hd.is_shadow << " extract: " << hd.is_extracted << " virtual: " << hd.is_virtual << " ver: " << hd.ver_num << " size: " << len << endl;
+						if (WRITE_MMB_RGB)
+							ofs2 << mmb << ") ";
+
 						if(PARSE_MMB) {
 							cout << "parsing MMB" << endl;
 							if(decode_mmb((BYTE*)(p+16), len))
@@ -113,35 +128,35 @@ bool CDatLoader::loadDat(int fno)
 				break;
 				case 0x20:  //32 IMG
 
-						ofs << "offset: " << p-start << " IMG " << iname << " type: " << hd.type << " size: " << len << endl;
+						ofs << "offset: " << p-start << " IMG " << iname << " type: " << hd.type << " shadow: " << hd.is_shadow << " extract: " << hd.is_extracted << " virtual: " << hd.is_virtual << " ver: " << hd.ver_num << " size: " << len << endl;
 						if(PARSE_IMG) {
 							cout << "parsing Image" << endl;
 							extractImage(p+sizeof(DATHEAD), len-sizeof(DATHEAD));
 						}
 				break;
 				case 0x29:	//41 Bone
-						ofs << "offset: " << p-start << " Bone " << iname << " type: " << hd.type << " size: " << len << endl;
+						ofs << "offset: " << p-start << " Bone " << iname << " type: " << hd.type << " shadow: " << hd.is_shadow << " extract: " << hd.is_extracted << " virtual: " << hd.is_virtual << " ver: " << hd.ver_num << " size: " << len << endl;
 						if(PARSE_BONE) {
 							cout << "parsing Bone" << endl;
 							extractBone(p+sizeof(DATHEAD),len-sizeof(DATHEAD));
 						}
 				break;
 				case 0x2B:	//43 animation
-						ofs << "offset: " << p-start << " Animation " << iname << " type: " << hd.type << " size: " << len << endl;
+						ofs << "offset: " << p-start << " Animation " << iname << " type: " << hd.type << " shadow: " << hd.is_shadow << " extract: " << hd.is_extracted << " virtual: " << hd.is_virtual << " ver: " << hd.ver_num << " size: " << len << endl;
 						if(PARSE_ANIM) {
 							cout << "parsing Animation" << endl;
 							extractAnimation(p+sizeof(DATHEAD), len-sizeof(DATHEAD));
 						}
 				break;
 				case 0x2a:	//42 vertex
-						ofs << "offset: " << p-start << " Vertex " << iname << " type: " << hd.type << " size: " << len << endl;
+						ofs << "offset: " << p-start << " Vertex " << iname << " type: " << hd.type << " shadow: " << hd.is_shadow << " extract: " << hd.is_extracted << " virtual: " << hd.is_virtual << " ver: " << hd.ver_num << " size: " << len << endl;
 						if(PARSE_VERTEX) {
 							cout << "parsing Vertex" << endl;
 							extractVertex(p+sizeof(DATHEAD),len-sizeof(DATHEAD));
 						}
 				break;
 				case 0x5:		//5
-						ofs << "offset: " << p-start << " unknown " << iname << " type: " << hd.type << " size: " << len << endl;
+						ofs << "offset: " << p-start << " unknown " << iname << " type: " << hd.type << " shadow: " << hd.is_shadow << " extract: " << hd.is_extracted << " virtual: " << hd.is_virtual << " ver: " << hd.ver_num << " size: " << len << endl;
 						if(PARSE_UNK && COUNT_W==5) {
 							sprintf_s(buf,50,"ZDat5_%d_%s", Z5++,iname);
 							datout.open(buf, std::ofstream::out| std::ofstream::binary);
@@ -150,7 +165,7 @@ bool CDatLoader::loadDat(int fno)
 						}
 					break;
 				case 0x7:		//7 schedule animation??
-						ofs << "offset: " << p-start << " schedule " << iname << " type: " << hd.type << " size: " << len << endl;
+						ofs << "offset: " << p-start << " schedule " << iname << " type: " << hd.type << " shadow: " << hd.is_shadow << " extract: " << hd.is_extracted << " virtual: " << hd.is_virtual << " ver: " << hd.ver_num << " size: " << len << endl;
 						if(PARSE_UNK && COUNT_W==7) {
 							sprintf_s(buf,50,"ZDat7_%d_%s", Z7++,iname);
 							datout.open(buf, std::ofstream::out| std::ofstream::binary);
@@ -159,7 +174,7 @@ bool CDatLoader::loadDat(int fno)
 						}
 					break;
 				case 0x19:	//25 
-						ofs << "offset: " << p-start << " unknown " << iname << " type: " << hd.type << " size: " << len << endl;
+						ofs << "offset: " << p-start << " unknown " << iname << " type: " << hd.type << " shadow: " << hd.is_shadow << " extract: " << hd.is_extracted << " virtual: " << hd.is_virtual << " ver: " << hd.ver_num << " size: " << len << endl;
 						if(PARSE_UNK && COUNT_W==25) {
 							sprintf_s(buf,50,"ZDat25_%d_%s", Z25++,iname);
 							datout.open(buf, std::ofstream::out| std::ofstream::binary);
@@ -167,8 +182,17 @@ bool CDatLoader::loadDat(int fno)
 							datout.close();
 						}
 					break;
+				case 0x1F:	//31 effect data
+					ofs << "offset: " << p - start << " unknown " << iname << " type: " << hd.type << " shadow: " << hd.is_shadow << " extract: " << hd.is_extracted << " virtual: " << hd.is_virtual << " ver: " << hd.ver_num << " size: " << len << endl;
+					if (PARSE_UNK && COUNT_W == 31) {
+						sprintf_s(buf, 50, "ZDat31_%d_%s", Z31++, iname);
+						datout.open(buf, std::ofstream::out | std::ofstream::binary);
+						datout.write(p + sizeof(DATHEAD), len - sizeof(DATHEAD));
+						datout.close();
+					}
+					break;
 				case 0x3D:	//61 animation subcategory???
-						ofs << "offset: " << p-start << " category " << iname << " type: " << hd.type << " size: " << len << endl;
+						ofs << "offset: " << p-start << " category " << iname << " type: " << hd.type << " shadow: " << hd.is_shadow << " extract: " << hd.is_extracted << " virtual: " << hd.is_virtual << " ver: " << hd.ver_num << " size: " << len << endl;
 						if(PARSE_UNK && COUNT_W==61) {
 							sprintf_s(buf,50,"ZDat61_%d_%s", Z61++,iname);
 							datout.open(buf, std::ofstream::out| std::ofstream::binary);
@@ -178,7 +202,7 @@ bool CDatLoader::loadDat(int fno)
 					break;
 
 				default:
-						ofs << "offset: " << p-start << " unknown " << iname << " type: " << hd.type << " size: " << len << endl;
+						ofs << "offset: " << p-start << " unknown " << iname << " type: " << hd.type << " shadow: " << hd.is_shadow << " extract: " << hd.is_extracted << " virtual: " << hd.is_virtual << " ver: " << hd.ver_num << " size: " << len << endl;
 						if(PARSE_UNK && COUNT_W==type) {
 							sprintf_s(buf,50,"ZDatUnk_%d_%s", ZUNK++,iname);
 							datout.open(buf, std::ofstream::out| std::ofstream::binary);
@@ -187,6 +211,7 @@ bool CDatLoader::loadDat(int fno)
 						}
 				break;
 			}
+			ofs << "offset segment: " << ((p - start) + len) << std::endl;
 		}
 
 
@@ -197,6 +222,8 @@ bool CDatLoader::loadDat(int fno)
 	cout << "Done parsing dat" << endl;
 	f.Free();
 	ofs.close();
+	if (WRITE_MMB_RGB)
+		ofs2.close();
 	return true;
 }
 
@@ -224,17 +251,18 @@ void CDatLoader::extractMZB(char *p, unsigned int len, unsigned int count, bool 
 	buf[16]=0x00;
 	unsigned int totalsize=0,num,val,size;
 	SMZBHeader *mzbh1 = (SMZBHeader*)p;
-	mzbh1->totalRecord100 &=0xffffff;
+//	mzbh1->totalRecord100 &=0xffffff;
 	memcpy(buf,mzbh1->id,4);
 	buf[4]=0x00;
 //	ofs << "id: " << mzbh1->id[0] << mzbh1->id[1] << mzbh1->id[2] << mzbh1->id[3] << " Total100: " << mzbh1->totalRecord100 << " offset Collision: " << mzbh1->offsetHeader2 << " unk1: " << mzbh1->unk1 << " unk2: " << mzbh1->unk2 << " unk3: " << mzbh1->unk3 << " offsetEnd: " << mzbh1->offsetEnd << " unk4: " << mzbh1->unk4 << " unk5: " << mzbh1->unk5 << endl;
-	ofs << "id: " << buf << " Total100: " << mzbh1->totalRecord100 << " offsetCollision: " << mzbh1->offsetHeader2 << " d: " << mzbh1->d1 << "," << mzbh1->d2 << "," << mzbh1->d3 << "," << mzbh1->d4 << " offsetCubetree: " << mzbh1->offsetCubetree << " offsetEndRecord100: " << mzbh1->offsetEndRecord100 << " offsetEndCubetree: " << mzbh1->offsetEndCubetree << " unk5: " << mzbh1->unk5 << endl;
+	ofs << "id: " << buf << " Total100: " << mzbh1->totalRecord100 << " R100Flg: " << mzbh1->R100Flag << " offsetCollision: " << mzbh1->offsetHeader2 << " d: " << mzbh1->d1 << "," << mzbh1->d2 << "," << mzbh1->d3 << "," << mzbh1->d4 << " offsetCubetree: " << mzbh1->offsetCubetree << " offsetEndRecord100: " << mzbh1->offsetEndRecord100 << " offsetEndCubetree: " << mzbh1->offsetEndCubetree << " unk5: " << mzbh1->unk5 << endl;
 	totalsize += sizeof(SMZBHeader);
 
 	SMZBBlock100 *oj=nullptr, ob;
 	SMZBBlock84 *b84=nullptr;
 	SMZBBlock92b *b92=nullptr;
-	int noj = mzbh1->totalRecord100 & 0xffffff;
+//	int noj = mzbh1->totalRecord100 & 0xffffff;
+	int noj = mzbh1->totalRecord100;
 
 	if( (noj*sizeof(SMZBBlock84) + sizeof(SMZBHeader))==mzbh1->offsetEndRecord100 ) {
 		//for MMB object
@@ -281,7 +309,8 @@ void CDatLoader::extractMZB(char *p, unsigned int len, unsigned int count, bool 
 			memcpy(buf, oj->id, 16);
 			ofs << "   " << i << ")  id: " << buf << " Trans: (" << oj->fTransX << ", " << oj->fTransY << ", " << oj->fTransZ << ")  Rot: (" << oj->fRotX << ", " << oj->fRotY << ", " << oj->fRotZ << ")" << endl;
 		//	ofs << "     Scale: (" << oj->fScaleX << ", " << oj->fScaleY << ", " << oj->fScaleZ << ")  [" << hex << uppercase << oj->fa << ", " << oj->fb << ", " << oj->fc << ", " << oj->fd << ", " << oj->fe << ", " << oj->ff << ", " << oj->fg << ", " << oj->fh << ", " << oj->fi << ", " << oj->fj << ", " << oj->fk << ", " << oj->fl << "]" << nouppercase << dec << endl;
-		ofs << "     Scale: (" << oj->fScaleX << ", " << oj->fScaleY << ", " << oj->fScaleZ << ")  [" << oj->fa << ", " << oj->fb << ", " << oj->fc << ", " << oj->fd << ", " << oj->fe << ", " << oj->ff << ", " << oj->fg << ", " << oj->fh << ", " << oj->fi << ", " << oj->fj << ", " << oj->fk << ", " << oj->fl << "]" << endl;
+			ofs << "     Scale: (" << oj->fScaleX << ", " << oj->fScaleY << ", " << oj->fScaleZ << ")  [" << oj->fa << ", " << oj->fb << ", " << oj->fc << ", " << oj->fd << ", " << hex << uppercase << oj->fe << ", " << oj->ff << ", " << oj->fg << ", " << oj->fh << ", " << nouppercase << dec << oj->fi << ", " << oj->fj << ", " << oj->fk << ", " << oj->fl << "]" << endl;
+		//ofs << "     Scale: (" << oj->fScaleX << ", " << oj->fScaleY << ", " << oj->fScaleZ << ")  [" << oj->fa << ", " << oj->fb << ", " << oj->fc << ", " << oj->fd << ", " << oj->fe << ", " << oj->ff << ", " << oj->fg << ", " << oj->fh << ", " << oj->fi << ", " << oj->fj << ", " << oj->fk << ", " << oj->fl << "]" << endl;
 			oj++;
 		}
 		totalsize += (noj*sizeof(SMZBBlock100));
@@ -398,11 +427,11 @@ void CDatLoader::extractMZB(char *p, unsigned int len, unsigned int count, bool 
 			if(pB128->numMZB!=0) {
 				totalMZB+=pB128->numMZB;
 				//MZB index
-				ofs << "MZB ref: ";
+				ofs << "MZB ref: [";
 				for(int j=0; j<pB128->numMZB; ++j) {
 					ofs << *(unsigned int*)(p+pB128->offsetMZB+j*4) << " ";
 				}
-				ofs << endl;
+				ofs << "]" << endl;
 			}
 			totalsize += sizeof(SMZBBlock128);
 			if(totalsize > mzbh1->offsetEndCubetree)
@@ -411,15 +440,17 @@ void CDatLoader::extractMZB(char *p, unsigned int len, unsigned int count, bool 
 
 		ofs << "Local offset cubeTree: " << totalsize << "  noRecord: " << (noj-1) << " total MZB ref: " << totalMZB << " total Rec100: " << mzbh1->totalRecord100 << endl;
 
-		//unknown data if totalMZB==Record100 reach
+		//mzbReference
 		if(totalsize < mzbh1->offsetEndCubetree ) {
 			sizeSpecial = (mzbh1->offsetEndCubetree-totalsize)/4;
-			for(index=1; index<sizeSpecial; ++index) {
+			for(index=0; index<sizeSpecial; ++index) {
 				ofs << *(unsigned int*)(p+totalsize+index*4) << " ";
-				if( index % 10 == 0 )
+				if( index!=0 && index % 10 == 0 )
 					ofs << endl;
 			}
 			ofs << endl;
+
+			ofs << "Local offset MZBref: " << (totalsize + index * 4) << endl;
 		}
 	}
 
@@ -439,21 +470,23 @@ void CDatLoader::extractMZB(char *p, unsigned int len, unsigned int count, bool 
 		} while(totalsize < mzbh1->offsetHeader2);
 	}
 
+	ofs << "Local offset DatRef: " << totalsize << endl;
+
 	//unknown data betweeen endCubeTree to Collision [seems to be dat no]
 	if( mzbh1->offsetHeader2==0 )
 		return;
 
 	//32Byte, block92...variable length
 	SMZBHeader2 *mzbh2 = (SMZBHeader2*)(p+mzbh1->offsetHeader2);
-	ofs << "offset: " << mzbh1->offsetHeader2 << ") Header2 - totalB92: " << mzbh2->totalRecord92 << ", offsetB92: " << mzbh2->offsetBlock92 << ", totalB16: " << mzbh2->totalBlock16 << ", offsetB16: " << mzbh2->offsetBlock16 << ", offsetB4: " << mzbh2->offsetVertex << ", offsetB112: "  << mzbh2->offsetBlock112 << ", totalB112: " << mzbh2->totalRecord112 << ", unk: " << mzbh2->unk1 << endl;
+	ofs << "offset: " << mzbh1->offsetHeader2 << ") Header2 - totalB92: " << mzbh2->totalRecord92 << " R92Flg: " << mzbh2->R92Flag << ", offsetB92: " << mzbh2->offsetBlock92 << ", totalB16: " << mzbh2->totalBlock16 << ", offsetB16: " << mzbh2->offsetBlock16 << ", offsetB4: " << mzbh2->offsetVertex << ", offsetB112: "  << mzbh2->offsetBlock112 << ", totalB112: " << mzbh2->totalRecord112 << ", unk: " << mzbh2->unk1 << endl;
 
-	mzbh2->totalRecord92 &=0xffffff;
+//	mzbh2->totalRecord92 &=0xffffff;
 	ofs << "  " << endl;
 	ofs << "Block92: " << mzbh2->totalRecord92 << endl;
 
 	totalsize=mzbh2->offsetBlock92;
 
-	unsigned int r1, r2, r3, sizeB, sizeV, sizeN;
+	unsigned int r1, r2, r3, sizeB, sizeV, sizeN, flgB;
 	float x,y,z;
 	char s1[10], s2[10], s3[10], s4[10];
 //	SMZBBlock92 *pB92 = (SMZBBlock92*)(p+totalsize);
@@ -462,10 +495,12 @@ void CDatLoader::extractMZB(char *p, unsigned int len, unsigned int count, bool 
 		r2 = (*(unsigned int*)(p+totalsize)); totalsize +=4;
 		r3 = (*(unsigned int*)(p+totalsize)); totalsize +=4;
 		sizeB = (*(unsigned int*)(p+totalsize)); totalsize +=4;
+		flgB = sizeB & 0xffff0000;
 		sizeB &= 0xffff;
+		
 		sizeV = (r2-r1)/12;
 		sizeN = (r3-r2)/12;
-		ofs << r1 << " - " << r2 << " - " << r3 << "  sizeV: " << sizeV << "  sizeN: " << sizeN << "  sizeB8: " << sizeB << endl;
+		ofs << r1 << " - " << r2 << " - " << r3 << "  sizeV: " << sizeV << "  sizeN: " << sizeN << "  sizeB8: " << sizeB << " flgB: " << hex << uppercase << flgB << nouppercase << dec << endl;
 		
 		for(int j=0; j<sizeV; ++j) {
 			x = (*(float*)(p+totalsize)); totalsize +=4;
@@ -521,22 +556,24 @@ void CDatLoader::extractMZB(char *p, unsigned int len, unsigned int count, bool 
 	ofs << "Block16: " << sizeV << endl;
 	totalsize = mzbh2->offsetBlock16;
 	SMZBBlock16 *pB16;
+	int ix = 5;
 	sizeN=0;
 	for(int i=0; i<sizeV; ++i) {
 		pB16 = (SMZBBlock16*)(p+totalsize);
 		if( pB16->i4==0 ) {
-			ofs << i << ") " << (pB16->i1-sizeN) << "  - " << pB16->i1 << ", " << pB16->i2 << ", " << pB16->i3 << ", " << pB16->i4 << endl;
+			ofs << i << ") addr: " << totalsize << " diff: " << (pB16->i1-sizeN) << "  - i1) " << pB16->i1 << ", i2) " << pB16->i2 << ", i3) " << pB16->i3 << ", i4) " << pB16->i4 << endl;
 			totalsize += 16;
 			sizeN = pB16->i1;
 		}
 		else {
-			ofs << i << ") " << (pB16->i1-sizeN) << "  - " << pB16->i1 << ", " << pB16->i2 << ", " << pB16->i3 << ", " << pB16->i4;
+			ofs << i << ") addr: " << totalsize << " diff: " << (pB16->i1-sizeN) << "  - i1) " << pB16->i1 << ", i2) " << pB16->i2 << ", i3) " << pB16->i3 << ", i4) " << pB16->i4;
 			totalsize += 16;
 			sizeN=pB16->i1;
+			ix = 5;
 			do {
 				r1 = (*(unsigned int*)(p+totalsize));
 				totalsize +=4;
-				ofs << ", " << r1;
+				ofs << ", " << ix++ << ") " << r1;
 			} while(r1!=0);
 			ofs << endl;
 		}
@@ -546,25 +583,33 @@ void CDatLoader::extractMZB(char *p, unsigned int len, unsigned int count, bool 
 	ofs << "Local offset B16: " << totalsize << endl;
 
 	//block4, scan till end of MZB
+	//every value is an addr to Block16
 	ofs << "Block4" << endl;
 	totalsize = mzbh2->offsetVertex;
 	unsigned int last=len-16;
-	for(int i=totalsize,j=0; i<len; ++j) {
+	int i, j;
+	for(i=totalsize,j=0; i<len; ++j) {
 		if(i>last) {
-			if((i-last) <5 )
-				ofs << j << ") " << (*(unsigned int*)(p+i)) << ", " << (*(unsigned int*)(p+i+4)) << ", " << (*(unsigned int*)(p+i+8)) << endl;
-			else if((i-last) < 9)
-				ofs << j << ") " << (*(unsigned int*)(p+i)) << ", " << (*(unsigned int*)(p+i+4)) << endl;
-			else if((i-last) < 13)
-				ofs << j << ") " << (*(unsigned int*)(p+i)) << endl;
-
+			if ((i - last) < 5) {
+				ofs << j << ") addr: " << i << "  " << (*(unsigned int*)(p + i)) << ", " << (*(unsigned int*)(p + i + 4)) << ", " << (*(unsigned int*)(p + i + 8)) << endl;
+				i += 12;
+			}
+			else if ((i - last) < 9) {
+				ofs << j << ") addr: " << i << "  " << (*(unsigned int*)(p + i)) << ", " << (*(unsigned int*)(p + i + 4)) << endl;
+				i += 8;
+			}
+			else if ((i - last) < 13) {
+				ofs << j << ") addr: " << i << "  " << (*(unsigned int*)(p + i)) << endl;
+				i += 4;
+			}
 			break;
 		}
 		else
-			ofs << j << ") " << (*(unsigned int*)(p+i)) << ", " << (*(unsigned int*)(p+i+4)) << ", " << (*(unsigned int*)(p+i+8)) << ", " << (*(unsigned int*)(p+i+12)) << endl;
+			ofs << j << ") addr: " << i << "  " << (*(unsigned int*)(p+i)) << ", " << (*(unsigned int*)(p+i+4)) << ", " << (*(unsigned int*)(p+i+8)) << ", " << (*(unsigned int*)(p+i+12)) << endl;
 
 		i+=16;
 	}
+	ofs << "Local offset B4: " << i << endl;
 
 	//output collision mesh for blender
 	if(OUTPUT_COLLISION_BLENDER) {
@@ -621,7 +666,7 @@ void CDatLoader::extractMZB(char *p, unsigned int len, unsigned int count, bool 
 
 void CDatLoader::decodeMesh(char *p, unsigned int offsetB112, unsigned int offsetB92)
 {
-	unsigned int r1, r2, r3, sizeB, sizeV, sizeN,totalsize=offsetB92;
+	unsigned int r1, r2, r3, sizeB, flgB, sizeV, sizeN,totalsize=offsetB92;
 //	float x,y,z;
 	SMZBVector v;
 	SMZBFace f;
@@ -631,6 +676,7 @@ void CDatLoader::decodeMesh(char *p, unsigned int offsetB112, unsigned int offse
 	r2 = (*(unsigned int*)(p+totalsize)); totalsize +=4;
 	r3 = (*(unsigned int*)(p+totalsize)); totalsize +=4;
 	sizeB = (*(unsigned int*)(p+totalsize)); totalsize +=4;
+	flgB = sizeB & 0xffff0000;
 	sizeB &= 0xffff;
 
 	sizeV = (r2-r1)/12;
@@ -1035,7 +1081,7 @@ void CDatLoader::extractMMB(char *p, unsigned int len, unsigned int count)
 		output.close();
 		delete []mmbbuf;
 	}
-	int indexS;
+	int indexS, indexFlag;
 	unsigned int totalsize=0, offsetStartMMB, offset, incr, rangeOffset, maxRange, in, maxSize;
 	SMZBVector v;
 	SMZBFace f;
@@ -1054,18 +1100,24 @@ void CDatLoader::extractMMB(char *p, unsigned int len, unsigned int count)
 		ofs << "  MMB Head: id: " << bufid << " type: " << pMMB->type << " size: " << pMMB->next*16 << "  shadow: " << pMMB->is_shadow << " extract: " << pMMB->is_extracted << " ver: " << pMMB->ver_num << " virtual: " << pMMB->is_virtual << endl;
 	}
 	else {
-		memcpy(buf, pMMB2->name, 16);
-		memcpy(buf1, pMMB2->unk2, 2);
-		sprintf_s(buf2,100,"d1: %d, d3: %d, d4: %d, [%2x,%2x] ", pMMB2->d1, pMMB2->d3, pMMB2->d4, pMMB2->unk2[0],pMMB2->unk2[1]);
+		memcpy(buf, pMMB2->name, 8);
+		buf[8] = 0x00;
+		sprintf_s(buf2,100,"d1: %d, d3: %d, [d4: %d, d5: %d, d6:%d] ", pMMB2->d1, pMMB2->d3, pMMB2->d4, pMMB2->d5, pMMB2->d6);
 		maxSize=pMMB2->MMBSize;
 		ofs << "  MMB Head2: size: " << pMMB2->MMBSize << " data: " << buf2 << " name: " << buf << endl;
+		if (WRITE_MMB_RGB)
+			ofs2 << buf2;
 	}
 	//48Byte, Define no of pieces (SMMBBLockHeader)
 	SMMBHeader *pMMBH = (SMMBHeader*)(p+totalsize);
 	totalsize += sizeof(SMMBHeader);
 	memcpy(buf, pMMBH->imgID, 16);
+	buf[16] = 0x00;
 	ofs << "  Header1:  imgID: " << buf << " pieces: " << pMMBH->pieces << "  BoundingRect Combine xyz (min,max): " <<  pMMBH->x1 << ", " << pMMBH->x2 << ", " << pMMBH->y1 << ", " << pMMBH->y2 << ", " << pMMBH->z1 << ", " << pMMBH->z2 << "  offsetBlockHeader: " << pMMBH->offsetBlockHeader << endl;
 
+	if (WRITE_MMB_RGB)
+		ofs2 << "  imgID: " << buf << endl;
+	
 	incr=0; rangeOffset=totalsize;
 	
 	if(pMMBH->offsetBlockHeader==0 ) {
@@ -1116,10 +1168,10 @@ void CDatLoader::extractMMB(char *p, unsigned int len, unsigned int count)
 			//20Byte Model Info, TextureName and Vertex Info
 			SMMBModelHeader *pMMBMH = (SMMBModelHeader*)(p+offset);
 			offset += sizeof(SMMBModelHeader);
-			pMMBMH->vertexsize &= 0xffff;
+//			pMMBMH->vertexsize &= 0xffff;
 			memcpy(buf,pMMBMH->textureName,16);
 			buf[16]=0x00;
-			ofs << "   Local offset: " << offset << "  Model: " << k << ")  textureName: " << buf << " BlockVertex size: " << pMMBMH->vertexsize << endl;
+			ofs << "   Local offset: " << offset << "  Model: " << k << ")  textureName: " << buf << " BlockVertex size: " << pMMBMH->vertexsize << " Blending: 0x" << hex << uppercase << pMMBMH->blending << dec << nouppercase << endl;
 
 			for(int i=0; i<pMMBMH->vertexsize; ++i) {
 				//2 different encoding, unknown condition
@@ -1153,7 +1205,9 @@ void CDatLoader::extractMMB(char *p, unsigned int len, unsigned int count)
 			}
 			//Num of Indices
 			indexS = (*(unsigned int*)(p+offset)) &0xffff;
-			ofs << "   Indices size: " << indexS << endl;
+			indexFlag = (*(unsigned int*)(p + offset)) & 0xffff0000;
+
+			ofs << "   Indices size: " << indexS << " Flg: 0x" << hex << uppercase << indexFlag << dec << nouppercase << endl;
 			offset += 4;
 			if( OUTPUT_MMB_BLENDER ) {
 				//COUNT_W is used to pinpoint the MMB Block to write to file, else there r too many block
@@ -1355,14 +1409,16 @@ void CDatLoader::extractImage(char *p, unsigned int len)
 	height = ii->imgy;
 	size = width*height;
 
-	if(ii->flg==0xA1)
+	if (ii->flg == 0xA1) {
 		ofs << "Flg: Ox" << hex << uppercase << (0x0000ff & ii->flg) << nouppercase << dec << " id: " << imgname << " x,y: " << ii->imgx << " " << ii->imgy << " bpp: " << ii->widthbyte << " size: " << ii->size << " block: " << ii->noBlock << endl;
+		ofs << "Flg: 0x" << hex << uppercase << (0xFFFF00 & ii->flg) << " unk2: 0x" << ii->dwnazo2[0] << " 0x" << ii->dwnazo2[1] << " 0x" << ii->dwnazo2[2] << " 0x" << ii->dwnazo2[3] << " 0x" << ii->dwnazo2[4] << " 0x" << ii->dwnazo2[5] << nouppercase << dec << endl;
+	}
 	else 
-		ofs << "Flg: Ox" << hex << uppercase << (0x0000ff & ii->flg) << nouppercase << dec << " id: " << imgname << " x,y: " << ii->imgx << " " << ii->imgy << " size: " << ii->size << endl;
+		ofs << "Flg: Ox" << hex << uppercase << (0x0000ff & ii->flg) << nouppercase << dec << " id: " << imgname << " x,y: " << ii->imgx << " " << ii->imgy << " width: " << ii->widthbyte << endl;
 
 	switch( ii->flg )
 	{
-	case 0xA1:	offset = sizeof(IMGINFOA1); sprintf_s(buf,500,"DATHEAD:16, IMGINFO Header:%d, Data:%d, Padding:%d", sizeof(IMGINFOA1), ii->size, len-sizeof(IMGINFOA1)-size);
+	case 0xA1:	offset = sizeof(IMGINFOA1); sprintf_s(buf,500,"DATHEAD:16, IMGINFO Header:%d, DXT%c, Data:%d, Padding:%d", sizeof(IMGINFOA1), ii->ddsType[0], ii->size, len-sizeof(IMGINFOA1)-size);
 		break;
 	case 0x01:	offset = sizeof(IMGINFO); sprintf_s(buf,500,"DATHEAD:16, IMGINFO Header:%d, Data:%d, Padding:%d", sizeof(IMGINFO), size, len-sizeof(IMGINFO)-size);
 		break;
@@ -1399,7 +1455,7 @@ void CDatLoader::extractVertex(char *p, unsigned int len)
 	DAT2AHeader *pcp=nullptr;
 
 	pcp=(DAT2AHeader *)(p+totalsize);
-	sprintf_s(buf,500,"    ver:%d,  nazo:%d,  type:%d,  flip:%d", pcp->ver, pcp->nazo, pcp->type, pcp->flip);
+	sprintf_s(buf,500,"    ver:%d,  nazo:%d,  type:%d,  flip:%d", pcp->ver, pcp->nazo, (pcp->type &0x7f), pcp->flip);
 	str.assign(buf);
 	ofs << str << endl;
 

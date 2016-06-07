@@ -618,7 +618,7 @@ void CDDS2Bmp::convert2BMP(u8 *p, u32 width, u32 height, u32 ddsSize, u32 pixelW
 				break;
 			case '3':	cdds.BC2decodeBlock(mem, image,i,j);
 				break;
-			case '5':	cdds.BC3decodeBlock(mem, image,i,j);
+			case '5':	cdds.BC3decodeBlock(mem, image, i, j);
 				break;
 			}
 			off += blockSize;
