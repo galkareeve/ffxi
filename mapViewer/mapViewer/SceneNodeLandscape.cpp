@@ -19,6 +19,7 @@ CSceneNodeLandscape::CSceneNodeLandscape(ISceneNode *parent, CSceneManager *mgr)
 	m_pCubeMB=nullptr;
 	m_pFrustumMB=nullptr;
 	m_isMMBModelInc = true;
+	m_curMMBModel = 0;
 }
 
 CSceneNodeLandscape::~CSceneNodeLandscape(void)
@@ -387,6 +388,10 @@ void CSceneNodeLandscape::prevMMB()
 
 void CSceneNodeLandscape::nextMMBModel()
 {
+	if (m_isOctree) {
+		std::cout << "To view individual MMB/MZB, press 'O' to remove octree, 'M' to switch, 'V' to view subPiece" << std::endl;
+		return;
+	}
 	CMeshBufferGroup *pMBG = m_pMesh->getMeshBufferGroup(0);
 	int mbc = pMBG->getMeshBufferCount();
 	++m_curMMBModel;
