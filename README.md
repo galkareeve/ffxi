@@ -24,3 +24,6 @@ Note: mapViewer uses VisualStudio NuGet Manager for opengl, glfw2, glew.  The pa
 access thru 'Tools -> NuGet Package Manager -> Manage NuGet Packages for Solution'
 
 Note: when enable glEnable(GL_CULL_FACE), some of the polygon appear to have inverted normal.  Not sure this is by design (for lighting??) or is a bug?
+
+Remember to change --- char ffxidir[512]="E:\\Program Files (x86)\\PlayOnline2\\SquareEnix\\FINAL FANTASY XI\\";
+to your folder.
