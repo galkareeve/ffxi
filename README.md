@@ -12,3 +12,13 @@ ffxi dat reverse engineering
 NOTE:
 for user that encounter GLFW3 crash when calling glfwInit(), u have to goto Project Properties -> C/C++ -> Code Generation ->
 Runtime Library, change /MDd to /MD
+
+7 June 2016
+1) fix transparency for mapViewer
+
+2) add func 'v' to view individual Model within each MMB.
+
+Note: mapViewer uses VisualStudio NuGet Manager for opengl, glfw2, glew.  The packages is 'nupengl.core'
+access thru 'Tools -> NuGet Package Manager -> Manage NuGet Packages for Solution'
+
+Note: when enable glEnable(GL_CULL_FACE), some of the polygon appear to have inverted normal.  Not sure this is by design (for lighting??) or is a bug?
