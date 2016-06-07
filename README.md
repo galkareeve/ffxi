@@ -14,6 +14,7 @@ for user that encounter GLFW3 crash when calling glfwInit(), u have to goto Proj
 Runtime Library, change /MDd to /MD
 
 7 June 2016
+------------
 1) fix transparency for mapViewer
 
 2) add func 'v' to view individual Model within each MMB.
