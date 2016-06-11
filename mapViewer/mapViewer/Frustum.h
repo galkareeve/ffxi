@@ -16,6 +16,7 @@ struct SFrustumFlg
 	unsigned int partial:1;
 };
 
+struct GLFWwindow;
 class CFrustum
 {
 public:
@@ -41,7 +42,7 @@ public:
 	glm::vec3 getVertexP(glm::vec3 &normal, glm::vec3 &min, glm::vec3 &max);
 	glm::vec3 getVertexN(glm::vec3 &normal, glm::vec3 &min, glm::vec3 &max);
 
-	void computeMatricesFromInputs();
+	void computeMatricesFromInputs(GLFWwindow* window, int screenWidth, int screenHeight);
 	glm::mat4 getViewMatrix();
 	glm::mat4 getProjectionMatrix();
 

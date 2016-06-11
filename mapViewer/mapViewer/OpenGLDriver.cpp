@@ -358,5 +358,5 @@ void COpenGLDriver::createMatrixHandler()
 
 	MultiplerID = glGetUniformLocation(m_programID, "iMultipler");
 	useAlphaID = glGetUniformLocation(m_programID, "iuseAlpha");
-	MaterialColorID = glGetUniformLocation(m_programID, "iMatColor");
+//	MaterialColorID = glGetUniformLocation(m_programID, "iMatColor");
 }

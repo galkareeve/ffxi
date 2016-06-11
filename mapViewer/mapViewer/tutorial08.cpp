@@ -36,11 +36,12 @@ GLFWwindow* window;
 #include "Frustum.h"
 
 CFrustum *pFrustum;
-
+//int screenWidth = 768, screenHeight = 576;
+int screenWidth = 1024, screenHeight = 768;
 void winFocus(GLFWwindow* handle, int isFocus)
 {
 	if(isFocus==GL_TRUE) {
-		glfwSetCursorPos(window, 768/2, 576/2);
+		glfwSetCursorPos(window, screenWidth /2, screenHeight /2);
 		pFrustum->setFocus(true);
 	}
 	else
@@ -49,6 +50,8 @@ void winFocus(GLFWwindow* handle, int isFocus)
 
 int main( int argc, char** argv )
 {
+	
+
 	// Initialise GLFW
 	if( !glfwInit() )
 	{
@@ -62,7 +65,7 @@ int main( int argc, char** argv )
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Open a window and create its OpenGL context
-	window = glfwCreateWindow( 768, 576, "Tutorial 08 - Basic Shading", NULL, NULL);
+	window = glfwCreateWindow(screenWidth, screenHeight, "Tutorial 08 - Basic Shading", NULL, NULL);
 	if( window == NULL ){
 		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
 		glfwTerminate();
@@ -80,7 +83,7 @@ int main( int argc, char** argv )
 
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-	glfwSetCursorPos(window, 768/2, 576/2);
+	glfwSetCursorPos(window, screenWidth /2, screenHeight /2);
 
 	// Dark blue background
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -317,7 +320,7 @@ int main( int argc, char** argv )
 			}
 		}
 		// Compute the MVP matrix from keyboard and mouse input
-		pFrustum->computeMatricesFromInputs();
+		pFrustum->computeMatricesFromInputs(window, screenWidth, screenHeight);
 		
 		glm::mat4 ProjectionMatrix = pFrustum->getProjectionMatrix();
 		glm::mat4 ViewMatrix = pFrustum->getViewMatrix();

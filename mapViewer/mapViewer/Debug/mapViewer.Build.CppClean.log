@@ -2,7 +2,6 @@ d:\c_project\mygameengine\mapviewer\mapviewer\debug\vc140.pdb
 d:\c_project\mygameengine\mapviewer\mapviewer\debug\vc140.idb
 d:\c_project\mygameengine\mapviewer\mapviewer\debug\cscenenodeanimatorrotation.obj
 d:\c_project\mygameengine\mapviewer\mapviewer\debug\dds2bmp.obj
-d:\c_project\mygameengine\mapviewer\mapviewer\debug\ffxilandscapemesh.obj
 d:\c_project\mygameengine\mapviewer\mapviewer\debug\ffximesh.obj
 d:\c_project\mygameengine\mapviewer\mapviewer\debug\ffxi_character.obj
 d:\c_project\mygameengine\mapviewer\mapviewer\debug\fps_counter.obj
@@ -14,14 +13,15 @@ d:\c_project\mygameengine\mapviewer\mapviewer\debug\octree.obj
 d:\c_project\mygameengine\mapviewer\mapviewer\debug\opengldriver.obj
 d:\c_project\mygameengine\mapviewer\mapviewer\debug\plane.obj
 d:\c_project\mygameengine\mapviewer\mapviewer\debug\scenemanager.obj
-d:\c_project\mygameengine\mapviewer\mapviewer\debug\scenenode.obj
-d:\c_project\mygameengine\mapviewer\mapviewer\debug\scenenodelandscape.obj
 d:\c_project\mygameengine\mapviewer\mapviewer\debug\shader.obj
 d:\c_project\mygameengine\mapviewer\mapviewer\debug\texture.obj
 d:\c_project\mygameengine\mapviewer\mapviewer\debug\timer.obj
-d:\c_project\mygameengine\mapviewer\mapviewer\debug\tutorial08.obj
 d:\c_project\mygameengine\mapviewer\mapviewer\debug\cscenenodeanimatorflycircle.obj
 d:\c_project\mygameengine\mapviewer\mapviewer\debug\cscenenodeanimatorflystraight.obj
+d:\c_project\mygameengine\mapviewer\mapviewer\debug\ffxilandscapemesh.obj
+d:\c_project\mygameengine\mapviewer\mapviewer\debug\tutorial08.obj
+d:\c_project\mygameengine\mapviewer\mapviewer\debug\scenenodelandscape.obj
+d:\c_project\mygameengine\mapviewer\mapviewer\debug\scenenode.obj
 d:\c_project\mygameengine\mapviewer\debug\mapviewer.ilk
 d:\c_project\mygameengine\mapviewer\debug\mapviewer.exe
 d:\c_project\mygameengine\mapviewer\debug\mapviewer.pdb

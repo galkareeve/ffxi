@@ -1,17 +1,8 @@
-﻿Build started 7/6/2016 11:56:39 AM.
+﻿Build started 11/6/2016 9:34:41 PM.
      1>Project "D:\c_project\myGameEngine\mapViewer\mapViewer\mapViewer.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         E:\Program Files\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ID:\c_project\myGameEngine\mapViewer\packages\nupengl.core.0.1.0.1\build\native\../..//build/native/include/ /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt FFXILandscapeMesh.cpp
-         FFXILandscapeMesh.cpp
-     1>d:\c_project\mygameengine\mapviewer\mapviewer\ffxilandscapemesh.cpp(243): warning C4244: 'initializing': conversion from 'std::streamoff' to 'int', possible loss of data
-     1>d:\c_project\mygameengine\mapviewer\mapviewer\ffxilandscapemesh.cpp(438): warning C4018: '<': signed/unsigned mismatch
-     1>d:\c_project\mygameengine\mapviewer\mapviewer\ffxilandscapemesh.cpp(485): warning C4018: '<': signed/unsigned mismatch
-     1>d:\c_project\mygameengine\mapviewer\mapviewer\ffxilandscapemesh.cpp(502): warning C4018: '<': signed/unsigned mismatch
-     1>d:\c_project\mygameengine\mapviewer\mapviewer\ffxilandscapemesh.cpp(537): warning C4018: '<': signed/unsigned mismatch
-     1>d:\c_project\mygameengine\mapviewer\mapviewer\ffxilandscapemesh.cpp(888): warning C4018: '<': signed/unsigned mismatch
-     1>d:\c_project\mygameengine\mapviewer\mapviewer\ffxilandscapemesh.cpp(1289): warning C4018: '<': signed/unsigned mismatch
-     1>d:\c_project\mygameengine\mapviewer\mapviewer\ffxilandscapemesh.cpp(1291): warning C4018: '<': signed/unsigned mismatch
-     1>d:\c_project\mygameengine\mapviewer\mapviewer\ffxilandscapemesh.cpp(1666): warning C4018: '<': signed/unsigned mismatch
+         E:\Program Files\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ID:\c_project\myGameEngine\mapViewer\packages\nupengl.core.0.1.0.1\build\native\../..//build/native/include/ /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt OpenGLDriver.cpp
+         OpenGLDriver.cpp
        Link:
          E:\Program Files\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\c_project\myGameEngine\mapViewer\Debug\mapViewer.exe" /INCREMENTAL /NOLOGO D:\c_project\myGameEngine\mapViewer\packages\nupengl.core.0.1.0.1\build\native\../..//build/native/lib/Win32\glew32.lib D:\c_project\myGameEngine\mapViewer\packages\nupengl.core.0.1.0.1\build\native\../..//build/native/lib/Win32\glfw3dll.lib D:\c_project\myGameEngine\mapViewer\packages\nupengl.core.0.1.0.1\build\native\../..//build/native/lib/Win32\freeglut.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"D:\c_project\myGameEngine\mapViewer\Debug\mapViewer.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\c_project\myGameEngine\mapViewer\Debug\mapViewer.lib" /MACHINE:X86 Debug\CSceneNodeAnimatorFlyCircle.obj
          Debug\CSceneNodeAnimatorFlyStraight.obj
@@ -40,4 +31,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.71
+Time Elapsed 00:00:02.88

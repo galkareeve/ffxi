@@ -1,7 +1,7 @@
 #include "Frustum.h"
 // Include GLFW
 #include <glfw/glfw3.h>
-extern GLFWwindow* window; // The "extern" keyword here is to access the variable "window" declared in tutorialXXX.cpp. This is a hack to keep the tutorials simple. Please avoid this.
+//extern GLFWwindow* window; // The "extern" keyword here is to access the variable "window" declared in tutorialXXX.cpp. This is a hack to keep the tutorials simple. Please avoid this.
 
 // Include GLM
 #include <glm/gtc/matrix_transform.hpp>
@@ -238,7 +238,7 @@ glm::mat4 CFrustum::getProjectionMatrix()
 	return ProjectionMatrix;
 }
 
-void CFrustum::computeMatricesFromInputs()
+void CFrustum::computeMatricesFromInputs(GLFWwindow* window, int screenWidth, int screenHeight)
 {
 	// glfwGetTime is called only once, the first time this function is called
 	static double lastTime = glfwGetTime();
@@ -252,26 +252,26 @@ void CFrustum::computeMatricesFromInputs()
 		glfwGetCursorPos(window, &xpos, &ypos);
 
 		// Reset mouse position for next frame
-		glfwSetCursorPos(window, 768/2, 576/2);
+		glfwSetCursorPos(window, screenWidth /2, screenHeight /2);
 	}
 	// Compute new orientation
 	if(!isDualCamera) {
 		//eye/camera use same view
-		horizontalAngle -= mouseSpeed * float(768/2 - xpos );
-		verticalAngle   -= mouseSpeed * float( 576/2 - ypos );
+		horizontalAngle -= mouseSpeed * float(screenWidth /2 - xpos );
+		verticalAngle   -= mouseSpeed * float(screenHeight /2 - ypos );
 		hAT = horizontalAngle;
 		vAT = verticalAngle;
 	}
 	else {
 		if(isEye) {
-			hAT -= mouseSpeed * float(768/2 - xpos );
-			vAT -= mouseSpeed * float( 576/2 - ypos );
+			hAT -= mouseSpeed * float(screenWidth /2 - xpos );
+			vAT -= mouseSpeed * float(screenHeight /2 - ypos );
 		}
 		else {
-			horizontalAngle -= mouseSpeed * float(768/2 - xpos );
-			verticalAngle   -= mouseSpeed * float( 576/2 - ypos );
-	//		horizontalAngle += mouseSpeed * float(768/2 - xpos );
-	//		verticalAngle   += mouseSpeed * float( 576/2 - ypos );
+			horizontalAngle -= mouseSpeed * float(screenWidth /2 - xpos );
+			verticalAngle   -= mouseSpeed * float(screenHeight /2 - ypos );
+	//		horizontalAngle += mouseSpeed * float(screenWidth/2 - xpos );
+	//		verticalAngle   += mouseSpeed * float( screenHeight/2 - ypos );
 		}
 	}
 	// Direction : Spherical coordinates to Cartesian coordinates conversion

@@ -11,17 +11,11 @@ out vec2 UV;
 out vec3 Position_worldspace;
 out vec3 Normal_cameraspace;
 out vec4 fragmentColor;
-out int Multipler;
-out int useAlpha;
-out vec3 materialColor;
 
 // Values that stay constant for the whole mesh.
 uniform mat4 MVP;
 uniform mat4 V;
 uniform mat4 M;
-uniform int iMultipler;
-uniform int iuseAlpha;
-uniform vec3 iMatColor;
 
 void main(){
 	// Output position of the vertex, in clip space : MVP * position
@@ -31,8 +25,5 @@ void main(){
 	// UV of the vertex. No special space for this one.
 	UV = vertexUV;
 	fragmentColor = vertexColor;
-	Multipler = iMultipler;
-	useAlpha = iuseAlpha;
-	materialColor = iMatColor;
 }
 
