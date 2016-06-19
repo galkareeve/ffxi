@@ -46,7 +46,7 @@ void CFrustum::setCamInternals(float angle, float ratio, float nearD, float farD
 {
 	// store the information
 	this->ratio = ratio;
-	this->angle = angle;
+	this->angle = ANG2RAD * angle;
 	this->nearD = nearD;
 	this->farD = farD;
 
@@ -376,7 +376,8 @@ void CFrustum::computeMatricesFromInputs(GLFWwindow* window, int screenWidth, in
 	//Projection/View Matrix used by shader
 	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
 	//this is different from the frustum parameter, this define what the shader will limit its drawing distance
-	ProjectionMatrix = glm::perspective(FoV, 4.0f / 3.0f, 0.1f, 1000.0f);
+	//ProjectionMatrix = glm::perspective(FoV, 4.0f / 3.0f, 0.1f, 1000.0f);
+	ProjectionMatrix = glm::perspective(angle, ratio, nearD, farD);
 	// Camera matrix, ensure camera is near the nearPlane, so that mesh doesnt pop in-out in view
 	glm::vec3 pos = position + direction * 1.2f;
 	ViewMatrix       = glm::lookAt(

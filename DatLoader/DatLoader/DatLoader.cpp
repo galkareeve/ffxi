@@ -1179,7 +1179,7 @@ void CDatLoader::extractMMB(char *p, unsigned int len, unsigned int count)
 					//48Byte, Vertex Info
 					SMMBBlockVertex2 *pMMBBV = (SMMBBlockVertex2*)(p+offset);
 					offset += sizeof(SMMBBlockVertex2);
-					sprintf_s(buf,40,"R:%d G:%d B:%d A:%d",pMMBBV->R, pMMBBV->G, pMMBBV->B, pMMBBV->A);
+					sprintf_s(buf,40,"B:%d G:%d R:%d A:%d",pMMBBV->B, pMMBBV->G, pMMBBV->R, pMMBBV->A);
 					ofs << setw(8) << i << ")  " << setw(6) << "xyz: " << setw(9) << pMMBBV->x << ", " << setw(9) << pMMBBV->y << ", " << setw(9) << pMMBBV->z << "  delta: " << setw(9) << pMMBBV->dx << ", " << setw(9) << pMMBBV->dy << ", " << setw(9) << pMMBBV->dz << "  normal: " << setw(9) << pMMBBV->hx << ", " << setw(9) << pMMBBV->hy << ", " << setw(9) << pMMBBV->hz << "  vertexColor: " << buf << " uv: " << pMMBBV->u << ", " << pMMBBV->v << endl;
 
 					if( OUTPUT_MMB_BLENDER ) {
@@ -1193,7 +1193,7 @@ void CDatLoader::extractMMB(char *p, unsigned int len, unsigned int count)
 					//36Byte, Vertex Info
 					SMMBBlockVertex *pMMBBV = (SMMBBlockVertex*)(p+offset);
 					offset += sizeof(SMMBBlockVertex);				
-					sprintf_s(buf,40,"R:%d G:%d B:%d A:%d",pMMBBV->R, pMMBBV->G, pMMBBV->B, pMMBBV->A);
+					sprintf_s(buf,40,"B:%d G:%d R:%d A:%d",pMMBBV->B, pMMBBV->G, pMMBBV->R, pMMBBV->A);
 					ofs << setw(8) << i << ")  " << setw(6) << "xyz: " << setw(9) << pMMBBV->x << ", " << setw(9) << pMMBBV->y << ", " << setw(9) << pMMBBV->z << "  normal: " << setw(9) << pMMBBV->hx << ", " << setw(9) << pMMBBV->hy << ", " << setw(9) << pMMBBV->hz << "  vertexColor: " << buf << " uv: " << pMMBBV->u << ", " << pMMBBV->v << endl;
 					if( OUTPUT_MMB_BLENDER ) {
 						if( (PARTIAL_MMB==1) && (count!=COUNT_W))

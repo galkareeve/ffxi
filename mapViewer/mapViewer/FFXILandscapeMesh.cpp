@@ -1487,9 +1487,9 @@ bool CFFXILandscapeMesh::lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in)
 		//	n.x = smmbv.hx;
 		//	n.y = smmbv.hy;
 		//	n.z = smmbv.hz;
-		//	color.x = (smmbv.color & 0xFF) /255.0f;
+		//	color.z = (smmbv.color & 0xFF) /255.0f;
 		//	color.y = ((smmbv.color & 0xFF00)>>8) /255.0f;
-		//	color.z = ((smmbv.color & 0xFF0000)>>16) /255.0f;
+		//	color.x = ((smmbv.color & 0xFF0000)>>16) /255.0f;
 		//	color.w = ((smmbv.color & 0xFF000000)>>24) /255.0f;
 		//	uv.x = smmbv.u;
 		//	uv.y = smmbv.v;
@@ -1516,9 +1516,9 @@ bool CFFXILandscapeMesh::lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in)
 			n.x = smmbv.hx;
 			n.y = smmbv.hy;
 			n.z = smmbv.hz;
-			color.x = (smmbv.color & 0xFF) /255.0f;
+			color.z = (smmbv.color & 0xFF) /255.0f;
 			color.y = ((smmbv.color & 0xFF00)>>8) /255.0f;
-			color.z = ((smmbv.color & 0xFF0000)>>16) /255.0f;
+			color.x = ((smmbv.color & 0xFF0000)>>16) /255.0f;
 			color.w = ((smmbv.color & 0xFF000000)>>24) /255.0f;
 			uv.x = smmbv.u;
 			uv.y = smmbv.v;

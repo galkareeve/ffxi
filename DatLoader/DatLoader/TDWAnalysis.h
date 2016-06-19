@@ -844,9 +844,9 @@ struct SMMBModelHeader {
 struct SMMBBlockVertex {
 	float x,y,z;
 	float hx,hy,hz;
-	unsigned int R:8;
-	unsigned int G:8;
 	unsigned int B:8;
+	unsigned int G:8;
+	unsigned int R:8;
 	unsigned int A:8;
 	float u, v;
 };
@@ -855,9 +855,9 @@ struct SMMBBlockVertex2 {
 	float x,y,z;
 	float dx,dy,dz;		//displacement?? cloth
 	float hx,hy,hz;
-	unsigned int R:8;
-	unsigned int G:8;
 	unsigned int B:8;
+	unsigned int G:8;
+	unsigned int R:8;
 	unsigned int A:8;
 	float u, v;
 };
