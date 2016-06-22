@@ -81,6 +81,9 @@
     <ClCompile Include="MeshBufferGroup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LooseTree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CSceneNodeAnimatorFlyCircle.h">
@@ -168,6 +171,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Utility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LooseTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

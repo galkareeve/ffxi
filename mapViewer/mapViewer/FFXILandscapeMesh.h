@@ -4,6 +4,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include "myEnum.h"
+#include "LooseTree.h"
 
 #pragma pack(push,1)
 
@@ -102,16 +103,16 @@ struct SLandscapeTextureInfo {
 
 struct SMZBHeader {
 	char id[4];
-	unsigned int totalRecord100:24;
-	unsigned int R100Flg:8;
+	unsigned int totalRecord100 : 24;
+	unsigned int R100Flag : 8;
 	unsigned int offsetHeader2;
-	unsigned int d1:8;
-	unsigned int d2:8;
-	unsigned int d3:8;
-	unsigned int d4:8;
-	int offsetOctree;		//???
-	unsigned int offsetEndRecord100;	
-	unsigned int offsetEndOctree;
+	unsigned int d1 : 8;
+	unsigned int d2 : 8;
+	unsigned int d3 : 8;
+	unsigned int d4 : 8;
+	int offsetlooseTree;
+	unsigned int offsetEndRecord100;
+	unsigned int offsetEndlooseTree;
 	int unk5;
 };
 
@@ -125,6 +126,26 @@ struct SMZBHeader2 {
 	unsigned int offsetBlock112;
 	unsigned int totalRecord112;
 	int unk1;
+};
+
+//looseTree
+struct SMZBBlock128 {
+	float x1, y1, z1;		//min/max boundingRect
+	float x2, y2, z2;
+	float x3, y3, z3;
+	float x4, y4, z4;
+	float x5, y5, z5;
+	float x6, y6, z6;
+	float x7, y7, z7;
+	float x8, y8, z8;
+	unsigned int offsetMZB;
+	unsigned int numMZB;
+	unsigned int offset3;
+	unsigned int offset4;
+	unsigned int offset5;
+	unsigned int offset6;
+	unsigned int offset7;
+	unsigned int offset8;
 };
 
 //used for MMB object
@@ -252,6 +273,11 @@ struct SMMBVertexIndices {
 	std::vector<glm::u16> vecIndices;
 };
 
+struct SSpecial {
+	unsigned int size;
+	std::vector<unsigned int> vecMZBref;
+};
+
 class CMMB
 {
 public:
@@ -285,7 +311,8 @@ public:
 	void addMeshBufferGroup(CMeshBufferGroup *in) {m_meshBufferGroup.push_back(in); };
 	int getMeshBufferGroupCount() { return m_meshBufferGroup.size(); };
 	void refreshMeshBufferGroup( int i, bool isMZB);
-	
+	void refreshSpecialMeshBufferGroup(int i);
+
 	int BitCount(unsigned char x);
 	SLandscapeTextureInfo extractImageName(char *p, glm::u32 &width, glm::u32 &height, glm::u8 *& ppImage);
 	void toggleMMBTransform();
@@ -296,6 +323,9 @@ public:
 	
 	void trimSpace(char *des, char *src, int len);
 	bool in_frustum(glm::mat4 M, glm::vec3 p);
+
+	void getLooseTree( std::map<unsigned int, pLT_Node> &out) { out = m_mapLT_Node; };
+	int getPVSCount() { return m_vecPVS.size(); };
 
 private:
 	IDriver *p_driver;
@@ -309,6 +339,8 @@ private:
 	std::vector<SMZBBlock100> m_vecMZB;
 	std::vector<CMMB*> m_vecMMB;
 	std::vector<CMMB*> m_vecDependMMB;
+	std::map<unsigned int, pLT_Node> m_mapLT_Node;
+	std::vector<SSpecial> m_vecPVS;
 
 	//MZB extraction
 	unsigned int m_lastIndices;

@@ -44,3 +44,12 @@ enum ESCENE_NODE_ANIMATOR_TYPE
 
 enum OVERLAP { OUTSIDE, INTERSECT, INSIDE };
 //enum E_POS {OUTSIDE, PARTIAL, INSIDE, LEFT_OUTSIDE, RIGHT_OUTSIDE, TOP_OUTSIDE, BOTTOM_OUTSIDE, NEAR_OUTSIDE, FAR_OUTSIDE};
+
+
+typedef struct
+{
+	float x1, x2;
+	float y1, y2;
+	float z1, z2;
+} BoundingBox;
+

@@ -685,9 +685,9 @@ struct SMZBHeader {
 	unsigned int d2:8;
 	unsigned int d3:8;
 	unsigned int d4:8;
-	int offsetCubetree;
+	int offsetlooseTree;
 	unsigned int offsetEndRecord100;	
-	unsigned int offsetEndCubetree;
+	unsigned int offsetEndlooseTree;
 	int unk5;
 };
 
@@ -734,13 +734,13 @@ struct SMZBBlock100 {
 	long fh, fi, fj, fk, fl;
 };
 
-//special
+//datRef
 struct SMZBBlock76 {
 	char datno[4];
 	char unk[72];
 };
 
-//cubetree???
+//looseTree
 struct SMZBBlock128 {
 	float x1,y1,z1;		//min/max boundingRect
 	float x2,y2,z2;
@@ -752,12 +752,12 @@ struct SMZBBlock128 {
 	float x8,y8,z8;
 	unsigned int offsetMZB;
 	unsigned int numMZB;
-	unsigned int offset3;	//front
-	unsigned int offset4;	//back
-	unsigned int offset5;	//left
-	unsigned int offset6;	//right
-	unsigned int offset7;	//top
-	unsigned int offset8;	//bottom
+	unsigned int offset3;
+	unsigned int offset4;
+	unsigned int offset5;
+	unsigned int offset6;
+	unsigned int offset7;
+	unsigned int offset8;
 };
 
 //variable length, no of vertex/normal depend on range.
@@ -844,9 +844,9 @@ struct SMMBModelHeader {
 struct SMMBBlockVertex {
 	float x,y,z;
 	float hx,hy,hz;
-	unsigned int B:8;
-	unsigned int G:8;
 	unsigned int R:8;
+	unsigned int G:8;
+	unsigned int B:8;
 	unsigned int A:8;
 	float u, v;
 };

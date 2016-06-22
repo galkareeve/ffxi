@@ -164,6 +164,9 @@ void COpenGLDriver::deleteTexture(unsigned int tid)
 
 void COpenGLDriver::drawCube(int frame, IMeshBuffer *mb)
 {
+	if (mb->m_vecFrameBuffer[frame]->m_vecVertices.size() == 0)
+		return;
+
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, mb->m_vecFrameBuffer[frame]->m_vecVertices.size() * sizeof(glm::vec3), &mb->m_vecFrameBuffer[frame]->m_vecVertices[0], GL_STATIC_DRAW);
 
@@ -207,6 +210,9 @@ void COpenGLDriver::drawCube(int frame, IMeshBuffer *mb)
 
 void COpenGLDriver::draw(int frame, IMeshBuffer *mb, int multipler, int useAlpha)
 {
+	if (mb->m_vecFrameBuffer[frame]->m_vecVertices.size() == 0)
+		return;
+
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, mb->m_vecFrameBuffer[frame]->m_vecVertices.size() * sizeof(glm::vec3), &mb->m_vecFrameBuffer[frame]->m_vecVertices[0], GL_STATIC_DRAW);
 

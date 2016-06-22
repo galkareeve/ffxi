@@ -307,7 +307,8 @@ void COctree::BuildTree(OCT_NODE *Node, int minMeshPerNode, std::vector<CMeshBuf
 	char buf[128];
 	OCT_NODE tmp;
 	GetBox(Node->BBox, &tmp.BBox, 0);
-	if( glm::abs(tmp.BBox.x2 - tmp.BBox.x1) <=10)
+//	if( glm::abs(tmp.BBox.x2 - tmp.BBox.x1) <=10)
+	if (glm::abs(tmp.BBox.x2 - tmp.BBox.x1) <= 20)
 		return;
 
 	//	Node has more than threshold number of triangles, create children

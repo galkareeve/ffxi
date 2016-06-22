@@ -121,6 +121,11 @@ CFFXILandscapeMesh::~CFFXILandscapeMesh(void)
 		delete *it;
 	}
 	m_vecMMB.clear();
+
+	for (auto mit = m_mapLT_Node.begin(); mit != m_mapLT_Node.end(); ++mit) {
+		delete mit->second;
+	}
+	m_mapLT_Node.clear();
 }
 
 
@@ -381,6 +386,31 @@ void CFFXILandscapeMesh::refreshMeshBufferGroup(int i, bool isMZB)
 //		if(!lookupMMB(-1, i, b100)) {
 		if(!lookupMMB(-1, i, nullptr)) {
 			std::cout << "MMB not valid (" << i << ")  " << std::endl;
+		}
+	}
+}
+
+void CFFXILandscapeMesh::refreshSpecialMeshBufferGroup(int i)
+{
+	char buf[100];
+	int mmbIndex = 0, size = 0;
+	SMZBBlock100 *b100;
+	SSpecial sp;
+
+	for (auto it = m_meshBufferGroup.begin(); it != m_meshBufferGroup.end(); ++it)
+		delete *it;
+
+	m_meshBufferGroup.clear();
+	//refresh all MZB in Special
+	sp = m_vecPVS[i];
+	size = sp.vecMZBref.size();
+	for (int j = 0; j<size; ++j) {
+		b100 = &m_vecMZB[sp.vecMZBref[j]];
+		mmbIndex = findMMBIndex(b100);
+		if (!lookupMMB(sp.vecMZBref[j], mmbIndex, b100)) {
+			memcpy(buf, b100->id, 16);
+			buf[16] = 0x00;
+			std::cout << "MZB not valid (" << sp.vecMZBref[j] << ")   id: " << buf << std::endl;
 		}
 	}
 }
@@ -1017,7 +1047,7 @@ void CFFXILandscapeMesh::extractMMB(char *p, unsigned int len, bool isDepend)
 void CFFXILandscapeMesh::extractMZB(char *p, unsigned int len)
 {
 	SMZBHeader *mzbh1 = (SMZBHeader*)p;
-	mzbh1->totalRecord100 &=0xffffff;
+//	mzbh1->totalRecord100 &=0xffffff;
 
 	char buf[17];
 	buf[16]=0x00;
@@ -1103,6 +1133,154 @@ void CFFXILandscapeMesh::extractMZB(char *p, unsigned int len)
 	else {
 		std::cout << "Unknown MZB " << std::endl;
 	}
+
+	//extract PVS
+	SSpecial sp;
+	int sizePVS = 0, index;
+	bool havelooseTree = false, havePVS = false;
+	havelooseTree = mzbh1->offsetlooseTree > mzbh1->offsetEndRecord100 && mzbh1->offsetEndlooseTree < mzbh1->offsetHeader2;
+	unsigned int totalsize,val;
+
+	if (havelooseTree) {
+		if (mzbh1->offsetlooseTree - mzbh1->offsetEndRecord100 > 16) {
+			havePVS = true;
+		}
+	}
+	else {
+		if (mzbh1->offsetlooseTree>0) {
+			sizePVS = mzbh1->offsetlooseTree;
+			havePVS = true;
+		}
+	}
+	if (havePVS) {
+		totalsize = mzbh1->offsetEndRecord100;
+		m_vecPVS.clear();
+		if (sizePVS == 0) {
+			sizePVS = *(unsigned int*)(p + totalsize);
+			totalsize += 4;
+		}
+
+		for (index = 1; index <= sizePVS; ++index) {
+			sp.vecMZBref.clear();
+			sp.size = *(unsigned int*)(p + totalsize);
+			totalsize += 4;
+			if (totalsize >= mzbh1->offsetHeader2)
+				break;
+
+			for (int i = 1; i <= sp.size; ++i) {
+				val = *(unsigned int*)(p + totalsize);
+				totalsize += 4;
+
+				sp.vecMZBref.push_back(val);
+				if (totalsize >= mzbh1->offsetHeader2)
+					break;
+			}
+			m_vecPVS.push_back(sp);
+		}
+	}
+
+	if (havelooseTree) {
+		totalsize = mzbh1->offsetlooseTree;
+		//24 float (min/max boundingRect - 8point), 8 int (MZBref + num + 6 nextNode)
+		unsigned int totalMZB = 0;
+		SMZBBlock128 *pB128 = nullptr;
+		do {
+			pB128 = (SMZBBlock128*)(p + totalsize);
+			pLT_Node pLT = new LT_Node;
+			pLT->addrID = totalsize;
+
+			//min
+			pLT->bbox.x1 = pB128->x1;
+			if (pB128->x2 < pLT->bbox.x1) pLT->bbox.x1 = pB128->x2;
+			if (pB128->x3 < pLT->bbox.x1) pLT->bbox.x1 = pB128->x3;
+			if (pB128->x4 < pLT->bbox.x1) pLT->bbox.x1 = pB128->x4;
+			if (pB128->x5 < pLT->bbox.x1) pLT->bbox.x1 = pB128->x5;
+			if (pB128->x6 < pLT->bbox.x1) pLT->bbox.x1 = pB128->x6;
+			if (pB128->x7 < pLT->bbox.x1) pLT->bbox.x1 = pB128->x7;
+			if (pB128->x8 < pLT->bbox.x1) pLT->bbox.x1 = pB128->x8;
+
+			pLT->bbox.y1 = pB128->y1;
+			if (pB128->y2 < pLT->bbox.y1) pLT->bbox.y1 = pB128->y2;
+			if (pB128->y3 < pLT->bbox.y1) pLT->bbox.y1 = pB128->y3;
+			if (pB128->y4 < pLT->bbox.y1) pLT->bbox.y1 = pB128->y4;
+			if (pB128->y5 < pLT->bbox.y1) pLT->bbox.y1 = pB128->y5;
+			if (pB128->y6 < pLT->bbox.y1) pLT->bbox.y1 = pB128->y6;
+			if (pB128->y7 < pLT->bbox.y1) pLT->bbox.y1 = pB128->y7;
+			if (pB128->y8 < pLT->bbox.y1) pLT->bbox.y1 = pB128->y8;
+
+			pLT->bbox.z1 = pB128->z1;
+			if (pB128->z2 < pLT->bbox.z1) pLT->bbox.z1 = pB128->z2;
+			if (pB128->z3 < pLT->bbox.z1) pLT->bbox.z1 = pB128->z3;
+			if (pB128->z4 < pLT->bbox.z1) pLT->bbox.z1 = pB128->z4;
+			if (pB128->z5 < pLT->bbox.z1) pLT->bbox.z1 = pB128->z5;
+			if (pB128->z6 < pLT->bbox.z1) pLT->bbox.z1 = pB128->z6;
+			if (pB128->z7 < pLT->bbox.z1) pLT->bbox.z1 = pB128->z7;
+			if (pB128->z8 < pLT->bbox.z1) pLT->bbox.z1 = pB128->z8;
+
+			//max
+			pLT->bbox.x2 = pB128->x1;
+			if (pB128->x2 > pLT->bbox.x2) pLT->bbox.x2 = pB128->x2;
+			if (pB128->x3 > pLT->bbox.x2) pLT->bbox.x2 = pB128->x3;
+			if (pB128->x4 > pLT->bbox.x2) pLT->bbox.x2 = pB128->x4;
+			if (pB128->x5 > pLT->bbox.x2) pLT->bbox.x2 = pB128->x5;
+			if (pB128->x6 > pLT->bbox.x2) pLT->bbox.x2 = pB128->x6;
+			if (pB128->x7 > pLT->bbox.x2) pLT->bbox.x2 = pB128->x7;
+			if (pB128->x8 > pLT->bbox.x2) pLT->bbox.x2 = pB128->x8;
+
+			pLT->bbox.y2 = pB128->y1;
+			if (pB128->y2 > pLT->bbox.y2) pLT->bbox.y2 = pB128->y2;
+			if (pB128->y3 > pLT->bbox.y2) pLT->bbox.y2 = pB128->y3;
+			if (pB128->y4 > pLT->bbox.y2) pLT->bbox.y2 = pB128->y4;
+			if (pB128->y5 > pLT->bbox.y2) pLT->bbox.y2 = pB128->y5;
+			if (pB128->y6 > pLT->bbox.y2) pLT->bbox.y2 = pB128->y6;
+			if (pB128->y7 > pLT->bbox.y2) pLT->bbox.y2 = pB128->y7;
+			if (pB128->y8 > pLT->bbox.y2) pLT->bbox.y2 = pB128->y8;
+
+			pLT->bbox.z2 = pB128->z1;
+			if (pB128->z2 > pLT->bbox.z2) pLT->bbox.z2 = pB128->z2;
+			if (pB128->z3 > pLT->bbox.z2) pLT->bbox.z2 = pB128->z3;
+			if (pB128->z4 > pLT->bbox.z2) pLT->bbox.z2 = pB128->z4;
+			if (pB128->z5 > pLT->bbox.z2) pLT->bbox.z2 = pB128->z5;
+			if (pB128->z6 > pLT->bbox.z2) pLT->bbox.z2 = pB128->z6;
+			if (pB128->z7 > pLT->bbox.z2) pLT->bbox.z2 = pB128->z7;
+			if (pB128->z8 > pLT->bbox.z2) pLT->bbox.z2 = pB128->z8;
+
+			if (pB128->offset3 != 0)
+				pLT->vecChild.push_back(pB128->offset3);
+
+			if (pB128->offset4 != 0)
+				pLT->vecChild.push_back(pB128->offset4);
+
+			if (pB128->offset5 != 0)
+				pLT->vecChild.push_back(pB128->offset5);
+
+			if (pB128->offset6 != 0)
+				pLT->vecChild.push_back(pB128->offset6);
+
+			if (pB128->offset7 != 0)
+				pLT->vecChild.push_back(pB128->offset7);
+
+			if (pB128->offset8 != 0)
+				pLT->vecChild.push_back(pB128->offset8);
+
+			pLT->noChild = pLT->vecChild.size();
+			pLT->noMZB = pB128->numMZB;
+
+			if (pB128->numMZB != 0) {
+				totalMZB += pB128->numMZB;
+				//MZB index
+				for (int j = 0; j<pB128->numMZB; ++j) {
+					pLT->vecMZBref.push_back( *(unsigned int*)(p + pB128->offsetMZB + j * 4));
+				}
+			}
+			//add record to map
+			m_mapLT_Node.insert(pair<unsigned int, pLT_Node>(pLT->addrID, pLT));
+
+			totalsize += sizeof(SMZBBlock128);
+			if (totalsize > mzbh1->offsetEndlooseTree)
+				break;
+		} while (totalMZB < mzbh1->totalRecord100);
+	}
 return;
 
 	//the following is for collision detection
@@ -1129,7 +1307,7 @@ return;
 	int mbIndex=0;
 	SMZBBlock16 *pB16=nullptr;
 	int sizeV = mzbh2->totalBlock16;
-	unsigned int totalsize = mzbh2->offsetBlock16;
+	totalsize = mzbh2->offsetBlock16;
 	unsigned int tmpN;
 	for(int i=0; i<sizeV; ++i) {
 		mbIndex=0;
@@ -1284,6 +1462,10 @@ bool CFFXILandscapeMesh::lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in)
 	SMMBBlockVertex2 smmbv;
 	if(mmbIndex<0)
 		return false;
+
+//debug
+//	if (mmbIndex == 63)
+//		mmbIndex = 55;
 
 	CMMB *pmmb = nullptr;
 	if(mmbIndex < 1000 && mmbIndex<m_vecMMB.size())
@@ -1487,9 +1669,9 @@ bool CFFXILandscapeMesh::lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in)
 		//	n.x = smmbv.hx;
 		//	n.y = smmbv.hy;
 		//	n.z = smmbv.hz;
-		//	color.z = (smmbv.color & 0xFF) /255.0f;
+		//	color.x = (smmbv.color & 0xFF) /255.0f;
 		//	color.y = ((smmbv.color & 0xFF00)>>8) /255.0f;
-		//	color.x = ((smmbv.color & 0xFF0000)>>16) /255.0f;
+		//	color.z = ((smmbv.color & 0xFF0000)>>16) /255.0f;
 		//	color.w = ((smmbv.color & 0xFF000000)>>24) /255.0f;
 		//	uv.x = smmbv.u;
 		//	uv.y = smmbv.v;
@@ -1516,6 +1698,7 @@ bool CFFXILandscapeMesh::lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in)
 			n.x = smmbv.hx;
 			n.y = smmbv.hy;
 			n.z = smmbv.hz;
+			//BGRA
 			color.z = (smmbv.color & 0xFF) /255.0f;
 			color.y = ((smmbv.color & 0xFF00)>>8) /255.0f;
 			color.x = ((smmbv.color & 0xFF0000)>>16) /255.0f;
@@ -1529,6 +1712,7 @@ bool CFFXILandscapeMesh::lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in)
 				v.z = v.z * in->fScaleZ;
 				v = glm::vec3(m4 * glm::vec4(v,1));
 				n = glm::vec3(m4 * glm::vec4(n,0));
+//				n = glm::vec3( glm::vec4(n,0) * glm::transpose(glm::inverse(m4)));
 				n = glm::normalize(n);
 			}
 			vecVertices.push_back(v);

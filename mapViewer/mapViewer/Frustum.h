@@ -35,6 +35,7 @@ public:
 	void setSpeedUp();
 	void setSpeedDown();
 	float getSpeed() { return speed; };
+
 	int pointInFrustum(glm::vec3 &p);
 	int sphereInFrustum(glm::vec3 &p, float raio);
 	int AAboxInFrustum(glm::vec3 &min, glm::vec3 &max);
@@ -56,6 +57,7 @@ public:
 	
 	glm::mat4 ViewMatrix;
 	glm::mat4 ProjectionMatrix;
+	glm::mat4 PVM;
 
 	// Initial position : on +Z
 	glm::vec3 position, positionT; 

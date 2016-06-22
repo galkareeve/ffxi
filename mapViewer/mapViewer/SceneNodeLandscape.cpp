@@ -5,6 +5,10 @@
 #include "MeshBufferGroup.h"
 #include <iostream>
 #include "Frustum.h"
+#include "LooseTree.h"
+
+//#define OCTREE
+#define LOOSETREE
 
 CSceneNodeLandscape::CSceneNodeLandscape(ISceneNode *parent, CSceneManager *mgr) : ISceneNode(parent,mgr)
 {
@@ -20,6 +24,8 @@ CSceneNodeLandscape::CSceneNodeLandscape(ISceneNode *parent, CSceneManager *mgr)
 	m_pFrustumMB=nullptr;
 	m_isMMBModelInc = true;
 	m_curMMBModel = 0;
+	m_curPVS = 0;
+	m_drawPVS = false;
 }
 
 CSceneNodeLandscape::~CSceneNodeLandscape(void)
@@ -27,7 +33,13 @@ CSceneNodeLandscape::~CSceneNodeLandscape(void)
 	m_pMesh->drop();
 	delete m_pCubeMB;
 	delete m_pFrustumMB;
+#ifdef OCTREE
 	delete m_pOctree;
+#endif
+
+#ifdef LOOSETREE
+	delete m_pLooseTree;
+#endif
 }
 
 void CSceneNodeLandscape::addMesh(IMesh *in)
@@ -35,33 +47,20 @@ void CSceneNodeLandscape::addMesh(IMesh *in)
 	m_pMesh = reinterpret_cast<CFFXILandscapeMesh*>(in);
 	m_pMesh->grab();
 
+#ifdef OCTREE
 	std::vector<CMeshBufferGroup*> vecMeshBufferGroup;
 	//create Octree
 	m_pMesh->getMeshBufferGroup(vecMeshBufferGroup);
 	m_pOctree = new COctree;
 	m_pOctree->Create(vecMeshBufferGroup, 3);
+#endif
 
-	//NOTE: all meshBufferGroup is added to the ROOT NODE!!!!
-	//int mbIndex, meshCount = m_pMesh->getMeshBufferGroupCount();
-	//std::vector<int> vecMeshReference;
-	//for(int i=0; i<meshCount; ++i)
-	//	vecMeshReference.push_back(0);
-
-	////verify all mesh is being reference by the node
-	//std::vector<OCT_NODE*> vecOctNode;
-	//std::vector<int> vecMeshBufferIndexPtr;
-	//m_pOctree->GetTables(vecOctNode, vecMeshBufferIndexPtr);
-	//for(auto it=vecOctNode.begin(); it!=vecOctNode.end(); ++it) {
-	//	for(int i=0,j=(*it)->meshBufferIndexStart; i<(*it)->meshBufferIndexCount; ++i,++j) {
-	//		mbIndex=vecMeshBufferIndexPtr[j];
-	//		vecMeshReference[mbIndex]=1;
-	//	}
-	//}
-
-	//for(auto it=vecMeshReference.begin(); it!=vecMeshReference.end(); ++it) {
-	//	if( (*it)==0 )
-	//		std::cout << "mbIndex: " << (*it) << " not reference" << std::endl;
-	//}
+#ifdef LOOSETREE
+	std::map<unsigned int, pLT_Node> mapLT_Node;
+	m_pMesh->getLooseTree(mapLT_Node);
+	m_pLooseTree = new CLooseTree;
+	m_pLooseTree->create(mapLT_Node);
+#endif
 
 	//create a MeshBuffer for rendering cube
 	m_pCubeMB = new IMeshBuffer(E_LINE);
@@ -85,7 +84,7 @@ void CSceneNodeLandscape::draw(IDriver *dr, glm::mat4 &ProjectionMatrix, glm::ma
 	glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 	dr->initProjectionMatrix(ModelMatrix, ViewMatrix, MVP);
 
-	if(m_isOctree) {
+	if(m_isOctree && !m_drawPVS) {
 		drawOctree(dr);
 		if(m_drawCube)
 			drawCube(dr, MVP);
@@ -180,23 +179,37 @@ void CSceneNodeLandscape::onAnimate(unsigned int timeMs)
 
 //	m_lastTime=timeMs;
 
-	if(m_curMMB!=-1)
+	if(m_curMMB!=-1 || m_drawPVS)
 		return;
 
-	//loop thru Octree and find the node within the frustum
-	std::vector<OCT_NODE*> vecOctNode;
-	std::vector<int> vecMeshBufferIndexPtr;
-	m_pOctree->GetTables(vecOctNode, vecMeshBufferIndexPtr);	
-
 	m_visibleMBG.clear();
-	if(m_drawCube) {
+	m_checkedMB.clear();
+	if (m_drawCube) {
 		m_pCubeMB->clear();
 		m_pFrustumMB->clear();
 		//get frustum plane
 		m_SceneManager->populateFrustumPlane(m_pFrustumMB);
 	}
-	m_checkedMB.clear();
+
+#ifdef OCTREE
+	//loop thru Octree and find the node within the frustum
+	std::vector<OCT_NODE*> vecOctNode;
+	std::vector<int> vecMeshBufferIndexPtr;
+	m_pOctree->GetTables(vecOctNode, vecMeshBufferIndexPtr);
 	traverseChild(vecOctNode, vecMeshBufferIndexPtr, 0);
+#endif
+
+#ifdef LOOSETREE
+	unsigned int rootID = m_pLooseTree->getRootNode();
+	pLT_Node pLT = nullptr;
+	if (m_drawCube) {
+		pLT = m_pLooseTree->getLTNode(rootID);
+		addColor2Cube(1.0f, pLT->bbox, glm::vec3(0.0f, 0.0f, 0.0f));
+	}
+	traverseNode(rootID);
+
+#endif
+
 }
 
 void CSceneNodeLandscape::traverseChild(std::vector<OCT_NODE*> &in, std::vector<int> &inIndex, int pos)
@@ -260,9 +273,60 @@ void CSceneNodeLandscape::checkMBGInFrustum(int start, int count, std::vector<in
 		if (pMBG == nullptr)
 			continue;
 
-		//Oriented Box
 		if(m_SceneManager->isAABoundingBoxInFrustum(pMBG->m_minBoundRect, pMBG->m_maxBoundRect)!=OUTSIDE)
 			m_visibleMBG.push_back(pMBG);
+	}
+}
+
+void CSceneNodeLandscape::traverseNode(unsigned int addrID)
+{
+	if (addrID == 0)
+		return;
+
+	pLT_Node pLT = m_pLooseTree->getLTNode(addrID);
+	if (pLT == nullptr)
+		return;
+
+	int ret;
+	CMeshBufferGroup *pMBG;
+	std::vector<unsigned int> vecMZB;
+
+	if (pLT->noMZB > 0) {
+		for(auto it = pLT->vecMZBref.begin(); it != pLT->vecMZBref.end(); ++it) {
+			pMBG = m_pMesh->getMeshBufferGroup(*it);
+			if (pMBG != nullptr) {
+				if (m_SceneManager->isAABoundingBoxInFrustum(pMBG->m_minBoundRect, pMBG->m_maxBoundRect) != OUTSIDE)
+					m_visibleMBG.push_back(pMBG);
+			}
+		}
+		return;
+	}
+
+	ret = m_SceneManager->isAABoundingBoxInFrustum(glm::vec3(pLT->bbox.x1, pLT->bbox.y1, pLT->bbox.z1), glm::vec3(pLT->bbox.x2, pLT->bbox.y2, pLT->bbox.z2));
+	if (ret == OUTSIDE) {
+		if (m_drawCube)
+			addColor2Cube(0.98f, pLT->bbox, glm::vec3(0.3f, 0.3f, 1.f));
+		return;
+	}
+
+	if (ret == INSIDE) {
+		//add all child MZBref
+		m_pLooseTree->getAllMZBref(pLT, vecMZB);
+		for (auto it = vecMZB.begin(); it != vecMZB.end(); ++it) {
+			pMBG = m_pMesh->getMeshBufferGroup(*it);
+			if (pMBG != nullptr)
+				m_visibleMBG.push_back(pMBG);
+		}
+		if (m_drawCube)
+			addColor2Cube(0.98f, pLT->bbox, glm::vec3(1.0f, 0.0f, 0.0f));
+		return;
+	}
+
+	//INTERSECT
+	for (auto it = pLT->vecChild.begin(); it != pLT->vecChild.end(); ++it) {
+		traverseNode(*it);
+		if (m_drawCube)
+			addColor2Cube(1.0f, pLT->bbox, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 }
 
@@ -277,7 +341,8 @@ void CSceneNodeLandscape::addColor2Cube( float per, BoundingBox &bbox, glm::vec3
 		box.z1*=per;
 		box.z2*=per;
 	}
-	//add the node's box to meshBuffer, draw 12 edge
+	//E_LINE
+	//add the node's box to meshBuffer, draw 12 edge (24 vertex)
 	m_pCubeMB->addVertexBuffer(0, glm::vec3(box.x1, box.y1, box.z1));
 	m_pCubeMB->addVertexBuffer(0, glm::vec3(box.x1, box.y1, box.z2));
 	m_pCubeMB->addVertexBuffer(0, glm::vec3(box.x1, box.y1, box.z1));
@@ -453,4 +518,52 @@ void CSceneNodeLandscape::updateBoundingRect()
 float CSceneNodeLandscape::getExtend()
 {
 	return m_pOctree->getExtend();
+}
+
+void CSceneNodeLandscape::toggleDrawPVS()
+{
+	int c= m_pMesh->getPVSCount();
+	if (c == 0) {
+		std::cout << "No Potential visible set available" << std::endl;
+		return;
+	}
+
+	std::cout << "Draw Potential visible set: " << (m_drawPVS ? "on  " : "off  ");
+	if (m_drawPVS)
+		std::cout << "total record: " << c << " cur: " << getCurrentPVS()+1 << std::endl;
+	else
+		std::cout << std::endl;
+
+	m_drawPVS = !m_drawPVS;
+	if (!m_drawPVS) {
+		m_curMMB = -1;
+		m_isMZB = true;
+		m_visibleMBG.clear();
+
+		m_pMesh->refreshMeshBufferGroup(m_curMMB, m_isMZB);
+	}
+	else {
+		m_curMMBModel = -1;
+		m_pMesh->refreshSpecialMeshBufferGroup(m_curPVS);
+	}
+}
+
+void CSceneNodeLandscape::nextPVS()
+{
+	m_curPVS++;
+	if (m_curPVS >= m_pMesh->getPVSCount())
+		m_curPVS = 0;
+
+	m_pMesh->refreshSpecialMeshBufferGroup(m_curPVS);
+//	updateBoundingRect();
+}
+
+void CSceneNodeLandscape::prevPVS()
+{
+	m_curPVS--;
+	if (m_curPVS < 0)
+		m_curPVS = m_pMesh->getPVSCount() - 1;
+
+	m_pMesh->refreshSpecialMeshBufferGroup(m_curPVS);
+//	updateBoundingRect();
 }

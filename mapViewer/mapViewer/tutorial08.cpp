@@ -36,8 +36,8 @@ GLFWwindow* window;
 #include "Frustum.h"
 
 CFrustum *pFrustum;
-//int screenWidth = 768, screenHeight = 576;
-int screenWidth = 1024, screenHeight = 768;
+int screenWidth = 768, screenHeight = 576;
+//int screenWidth = 1024, screenHeight = 768;
 void winFocus(GLFWwindow* handle, int isFocus)
 {
 	if(isFocus==GL_TRUE) {
@@ -120,7 +120,7 @@ int main( int argc, char** argv )
 	pDriver->createMatrixHandler();
 	pFrustum = new CFrustum;
 //	pFrustum->setCamInternals(45.0f, 4.0f / 3.0f, 0.1f, 500.0f);
-	pFrustum->setCamInternals(55.0f, 4.0f / 3.0f, 0.1f, 500.0f);
+	pFrustum->setCamInternals(60.0f, 1.0f*screenWidth/ screenHeight, 1.0f, 1000.0f);
 
 	CSceneManager *pSceneMgr = new CSceneManager;
 	pSceneMgr->addDriver(pDriver);
@@ -159,7 +159,7 @@ int main( int argc, char** argv )
 	glUseProgram(programID);
 //	GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
 
-	glFrontFace(GL_CW);
+	glFrontFace(GL_CCW);
 //	glDisable(GL_BLEND);
 	// Enable blending
 //	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
@@ -215,12 +215,12 @@ int main( int argc, char** argv )
 				std::cout << "refresh mesh by: " << ((pnode->isMZB())? "MZB":"MMB") << std::endl;
 			}
 		}
-		else if (glfwGetKey( window, GLFW_KEY_F ) == GLFW_PRESS){
-			if(glfwGetKey(window,GLFW_KEY_F) == GLFW_RELEASE) {
-				pnode->setCurrentMMB(-1);
-				std::cout << "All MMB " << std::endl;
-			}
-		}
+		//else if (glfwGetKey( window, GLFW_KEY_F ) == GLFW_PRESS){
+		//	if(glfwGetKey(window,GLFW_KEY_F) == GLFW_RELEASE) {
+		//		pnode->setCurrentMMB(-1);
+		//		std::cout << "All MMB " << std::endl;
+		//	}
+		//}
 		else if (glfwGetKey( window, GLFW_KEY_O ) == GLFW_PRESS){
 			if(glfwGetKey(window,GLFW_KEY_O) == GLFW_RELEASE) {
 				pnode->toggleIsOctree();
@@ -264,6 +264,33 @@ int main( int argc, char** argv )
 				else {
 					pFrustum->toggleEye();
 					std::cout << ((pFrustum->isMainEye())? "Eye ":"Camera ") << "active, press arrow key to move" << std::endl;
+				}
+			}
+		}
+		else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_RELEASE) {
+				pnode->toggleDrawPVS();
+			}
+		}
+		else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_RELEASE) {
+				if (!pnode->isDrawPVS()) {
+					std::cout << "press S to enable Potential visible set" << std::endl;
+				}
+				else {
+					pnode->prevPVS();
+					std::cout << "draw Potential visible set: " << pnode->getCurrentPVS()+1 << std::endl;
+				}
+			}
+		}
+		else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+			if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE) {
+				if (!pnode->isDrawPVS()) {
+					std::cout << "press S to enable Potential visible set" << std::endl;
+				}
+				else {
+					pnode->nextPVS();
+					std::cout << "draw Potential visible set: " << pnode->getCurrentPVS()+1 << std::endl;
 				}
 			}
 		}

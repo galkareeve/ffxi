@@ -4,11 +4,18 @@
 //extern GLFWwindow* window; // The "extern" keyword here is to access the variable "window" declared in tutorialXXX.cpp. This is a hack to keep the tutorials simple. Please avoid this.
 
 // Include GLM
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_access.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <iostream>
+#include <vector>
 
+#define PI	3.14159265358979323846
 #define ANG2RAD 3.14159265358979323846/180.0
+//#define	CLIP_SPACE
+#define GEOMETRIC
+
 CFrustum::CFrustum(void)
 {
 	ratio=nearD=farD=nw=nh=fw=fh=0;
@@ -46,7 +53,7 @@ void CFrustum::setCamInternals(float angle, float ratio, float nearD, float farD
 {
 	// store the information
 	this->ratio = ratio;
-	this->angle = ANG2RAD * angle;
+	this->angle = ANG2RAD*angle;
 	this->nearD = nearD;
 	this->farD = farD;
 
@@ -62,6 +69,7 @@ void CFrustum::setCamInternals(float angle, float ratio, float nearD, float farD
 void CFrustum::setCamDef(glm::vec3 &p, glm::vec3 &l, glm::vec3 &u) 
 {
 	cc = p;
+//#ifdef GEOMETRIC
 	glm::vec3 dir,nc,fc,X,Y,Z;
 
 	Z = p - l;
@@ -91,6 +99,12 @@ void CFrustum::setCamDef(glm::vec3 &p, glm::vec3 &l, glm::vec3 &u)
 	pl[RIGHT].set3Points(nbr,ntr,fbr);
 	pl[NEARP].set3Points(ntl,ntr,nbr);
 	pl[FARP].set3Points(ftr,ftl,fbl);
+//#endif
+
+#ifdef CLIP_SPACE
+	glm::mat4 view = glm::lookAt(p,l,u);
+	PVM = ProjectionMatrix * view;
+#endif
 }
 
 void CFrustum::setSpeedUp()
@@ -162,6 +176,8 @@ int CFrustum::AAboxInFrustum(glm::vec3 &min, glm::vec3 &max)
 {
 	float v;
 	int result = INSIDE;
+#ifdef GEOMETRIC
+	//9 fps
 	for(int i=0; i < 6; i++) {
 
 		if ((v=pl[i].distance(getVertexP(pl[i].normal, min, max))) < 0)
@@ -170,6 +186,96 @@ int CFrustum::AAboxInFrustum(glm::vec3 &min, glm::vec3 &max)
 			result = INTERSECT;
 	}
 	return(result);
+#endif
+
+#ifdef CLIP_SPACE
+	//check the 8 corner of boundingBox within the screen space
+	//-wc < xc < wc
+	//-wc < yc < wc
+	//-wc < zc < wc
+
+	//glm is column major
+	glm::vec4 row1 = glm::row(PVM,0);
+	glm::vec4 row2 = glm::row(PVM, 1);
+	glm::vec4 row3 = glm::row(PVM, 2);
+	glm::vec4 row4 = glm::row(PVM, 3);
+
+	std::vector<glm::vec4> vecPlane;
+	vecPlane.push_back(glm::vec4((row1.x + row4.x), (row1.y+row4.y), (row1.z+row4.z), (row1.w+row4.w)));			//left
+	vecPlane.push_back(glm::vec4((-row1.x + row4.x), (-row1.y + row4.y), (-row1.z + row4.z), (-row1.w + row4.w)));	//right
+	vecPlane.push_back(glm::vec4((row2.x + row4.x), (row2.y + row4.y), (row2.z + row4.z), (row2.w + row4.w)));		//bottom
+	vecPlane.push_back(glm::vec4((-row2.x + row4.x), (-row2.y + row4.y), (-row2.z + row4.z), (-row2.w + row4.w)));	//top
+	vecPlane.push_back(glm::vec4((row3.x + row4.x), (row3.y + row4.y), (row3.z + row4.z), (row3.w + row4.w)));		//near
+	vecPlane.push_back(glm::vec4((-row3.x + row4.x), (-row3.y + row4.y), (-row3.z + row4.z), (-row3.w + row4.w)));	//far
+
+	int in=0, out = 0;
+
+	//std::vector<glm::vec4> vecBox;
+	//vecBox.push_back(glm::vec4(min.x, min.y, min.z, 1.0f));
+	//vecBox.push_back(glm::vec4(min.x, min.y, max.z, 1.0f));
+	//vecBox.push_back(glm::vec4(min.x, max.y, min.z, 1.0f));
+	//vecBox.push_back(glm::vec4(min.x, max.y, max.z, 1.0f));
+	//vecBox.push_back(glm::vec4(max.x, min.y, min.z, 1.0f));
+	//vecBox.push_back(glm::vec4(max.x, min.y, max.z, 1.0f));
+	//vecBox.push_back(glm::vec4(max.x, max.y, min.z, 1.0f));
+	//vecBox.push_back(glm::vec4(max.x, max.y, max.z, 1.0f));
+
+	//float xc, yc, zc, wc;
+	////foreach plane, check 8 point
+	//for (auto it = vecPlane.begin(); it != vecPlane.end(); ++it) {
+	//	in = out = 0;
+	//	for (auto bt = vecBox.begin(); bt != vecBox.end(); ++bt) {
+	//		xc = (*it).x * (*bt).x;
+	//		yc = (*it).y * (*bt).y;
+	//		zc = (*it).z * (*bt).z;
+	//		wc = (*it).w * (*bt).w;
+
+	//		if (xc + yc + zc + wc > 0)
+	//			in++;
+	//		else
+	//			out++;
+	//	}
+
+	//	//if all corners are out
+	//	if (!in)
+	//		return OUTSIDE;
+	//	// if some corners are out and others are in
+	//	else if (out)
+	//		result = INTERSECT;
+	//}
+
+	//save 26 multiplication (4 -> 6 fps)
+	float x1, x2, y1, y2, z1, z2, w;
+	for (auto it = vecPlane.begin(); it != vecPlane.end(); ++it) {
+		in = out = 0;
+		x1 = (*it).x * min.x;
+		x2 = (*it).x * max.x;
+
+		y1 = (*it).y * min.y;
+		y2 = (*it).y * max.y;
+
+		z1 = (*it).z * min.z;
+		z2 = (*it).z * max.z;
+
+		w = (*it).w;
+		
+		//check 8 corner
+		(x1 + y1 + z1 + w > 0) ? in++ : out++;
+		(x1 + y1 + z2 + w > 0) ? in++ : out++;
+		(x1 + y2 + z1 + w > 0) ? in++ : out++;
+		(x1 + y2 + z2 + w > 0) ? in++ : out++;
+		(x2 + y1 + z1 + w > 0) ? in++ : out++;
+		(x2 + y1 + z2 + w > 0) ? in++ : out++;
+		(x2 + y2 + z1 + w > 0) ? in++ : out++;
+		(x2 + y2 + z2 + w > 0) ? in++ : out++;
+
+		if (!in)
+			return OUTSIDE;
+		else if (out)
+			result = INTERSECT;
+	}
+	return result;
+#endif
 }
 
 int CFrustum::OBboxInFrustum(glm::vec3 &min, glm::vec3 &max, glm::mat4 &mInv)
@@ -193,10 +299,7 @@ glm::vec3 CFrustum::getVertexP(glm::vec3 &normal, glm::vec3 &min, glm::vec3 &max
 	p.x = min.x;
 	p.y = min.y;
 	p.z = min.z;
-	//if (normal.x <= 0)
-	//	p.x = max.x;
-	//if (normal.y <=0)
-	//	p.y = max.y;
+
 	if( normal.x >=0 )
 		p.x = max.x;
 	if( normal.y >=0 )
@@ -213,10 +316,6 @@ glm::vec3 CFrustum::getVertexN(glm::vec3 &normal, glm::vec3 &min, glm::vec3 &max
 	n.x = max.x;
 	n.y = max.y;
 	n.z = max.z;
-	//if (normal.x <= 0)
-	//	n.x = min.x;
-	//if (normal.y <=0)
-	//	n.y = min.y;
 
 	if (normal.x >= 0)
 		n.x = min.x;
@@ -249,6 +348,7 @@ void CFrustum::computeMatricesFromInputs(GLFWwindow* window, int screenWidth, in
 
 	// Get mouse position
 	if(isFocus) {
+		//This function returns the position of the cursor, in screen coordinates, relative to the upper-left corner of the client area of the specified window.
 		glfwGetCursorPos(window, &xpos, &ypos);
 
 		// Reset mouse position for next frame
@@ -258,7 +358,10 @@ void CFrustum::computeMatricesFromInputs(GLFWwindow* window, int screenWidth, in
 	if(!isDualCamera) {
 		//eye/camera use same view
 		horizontalAngle -= mouseSpeed * float(screenWidth /2 - xpos );
-		verticalAngle   -= mouseSpeed * float(screenHeight /2 - ypos );
+		verticalAngle -= mouseSpeed * float(screenHeight / 2 - ypos);
+		//horizontalAngle += mouseSpeed * float(screenWidth / 2 - xpos);
+		//verticalAngle += mouseSpeed * float(screenHeight / 2 - ypos);
+
 		hAT = horizontalAngle;
 		vAT = verticalAngle;
 	}
@@ -266,12 +369,14 @@ void CFrustum::computeMatricesFromInputs(GLFWwindow* window, int screenWidth, in
 		if(isEye) {
 			hAT -= mouseSpeed * float(screenWidth /2 - xpos );
 			vAT -= mouseSpeed * float(screenHeight /2 - ypos );
+			//hAT += mouseSpeed * float(screenWidth / 2 - xpos);
+			//vAT += mouseSpeed * float(screenHeight / 2 - ypos);
 		}
 		else {
 			horizontalAngle -= mouseSpeed * float(screenWidth /2 - xpos );
-			verticalAngle   -= mouseSpeed * float(screenHeight /2 - ypos );
-	//		horizontalAngle += mouseSpeed * float(screenWidth/2 - xpos );
-	//		verticalAngle   += mouseSpeed * float( screenHeight/2 - ypos );
+			verticalAngle -= mouseSpeed * float(screenHeight / 2 - ypos);
+			//horizontalAngle += mouseSpeed * float(screenWidth/2 - xpos );
+			//verticalAngle   += mouseSpeed * float( screenHeight/2 - ypos );			
 		}
 	}
 	// Direction : Spherical coordinates to Cartesian coordinates conversion
@@ -283,9 +388,9 @@ void CFrustum::computeMatricesFromInputs(GLFWwindow* window, int screenWidth, in
 	
 	// Right vector
 	glm::vec3 right = glm::vec3(
-		sin(horizontalAngle - 3.14159265358979323846f/2.0f), 
+		sin(horizontalAngle - PI /2.0f),
 		0,
-		cos(horizontalAngle - 3.14159265358979323846f/2.0f)
+		cos(horizontalAngle - PI /2.0f)
 	);
 
 	// Up vector
@@ -301,20 +406,13 @@ void CFrustum::computeMatricesFromInputs(GLFWwindow* window, int screenWidth, in
 	
 	// Right vector
 	glm::vec3 rightT = glm::vec3(
-		sin(hAT - 3.14159265358979323846f/2.0f), 
+		sin(hAT - PI /2.0f),
 		0,
-		cos(hAT - 3.14159265358979323846f/2.0f)
+		cos(hAT - PI /2.0f)
 	);
 
 	// Up vector
 	glm::vec3 upT = glm::cross( directionT, rightT );
-
-	//frustum culling can depend on positionT or position (Dual)
-	//but what is display by the shader is dependent on the position
-	if(isDualCamera)
-		setCamDef(positionT, positionT+directionT, upT);
-	else
-		setCamDef(position, position+direction, up);
 
 	// Move forward
 	if (glfwGetKey( window, GLFW_KEY_UP ) == GLFW_PRESS){
@@ -371,15 +469,25 @@ void CFrustum::computeMatricesFromInputs(GLFWwindow* window, int screenWidth, in
 		}
 	}
 
+	//frustum culling can depend on positionT or position (Dual)
+	//but what is display by the shader is dependent on the position
+	if (isDualCamera)
+		setCamDef(positionT, positionT + directionT, upT);
+	else
+		setCamDef(position, position + direction, up);
+
 	float FoV = initialFoV;// - 5 * glfwGetMouseWheel(); // Now GLFW 3 requires setting up a callback for this. It's a bit too complicated for this beginner's tutorial, so it's disabled instead.
 
 	//Projection/View Matrix used by shader
 	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
 	//this is different from the frustum parameter, this define what the shader will limit its drawing distance
-	//ProjectionMatrix = glm::perspective(FoV, 4.0f / 3.0f, 0.1f, 1000.0f);
+//	ProjectionMatrix = glm::perspective(FoV, 4.0f / 3.0f, 0.1f, 1000.0f);
+
+	//glm::perspective (angle) is expresssed in Radians.
 	ProjectionMatrix = glm::perspective(angle, ratio, nearD, farD);
 	// Camera matrix, ensure camera is near the nearPlane, so that mesh doesnt pop in-out in view
-	glm::vec3 pos = position + direction * 1.2f;
+//	glm::vec3 pos = position + direction * 1.2f;
+	glm::vec3 pos = position + direction;
 	ViewMatrix       = glm::lookAt(
 								pos,           // Camera is here
 								pos+direction, // and looks here : at the same position, plus "direction"

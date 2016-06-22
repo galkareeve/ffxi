@@ -5,6 +5,7 @@
 
 class CFFXILandscapeMesh;
 class COctree;
+class CLooseTree;
 class IMeshBuffer;
 class CMeshBufferGroup;
 class CSceneNodeLandscape :	public ISceneNode
@@ -39,6 +40,12 @@ public:
 	void toggleIsMZB() { m_isMZB=!m_isMZB; }
 	void toggleIsOctree();
 	void toggleDrawCube() { m_drawCube=!m_drawCube; }
+	void toggleDrawPVS();
+	bool isDrawPVS() { return m_drawPVS; }
+	int getCurrentPVS() { return m_curPVS; }
+	void nextPVS();
+	void prevPVS();
+
 	bool isOctree() { return m_isOctree; }
 	bool isMZB() { return m_isMZB; }
 	bool isDrawCube() { return m_drawCube; }
@@ -47,20 +54,25 @@ public:
 	void checkMBGInFrustum(int start, int count, std::vector<int> &inIndex);
 	void updateBoundingRect();
 	float getExtend();
+	void traverseNode(unsigned int addrID);
 
 protected:
 	void addColor2Cube( float per, BoundingBox &bbox, glm::vec3 &in);
 
 	CFFXILandscapeMesh *m_pMesh;
 	COctree *m_pOctree;
+	CLooseTree *m_pLooseTree;
+
 	unsigned int m_lastTime;
 	float m_curFrame;
 	int m_curMMB;
-	
+	int m_curPVS;
+
 	bool m_isMZB;		//toggle btw lookupMMB by B100 or MMB index
 	bool m_isOctree;
 	bool m_drawCube;
 	bool m_isMMBModelInc;
+	bool m_drawPVS;
 	int m_curMMBModel;	//draw individual model within each MMB
 
 	IMeshBuffer *m_pCubeMB;

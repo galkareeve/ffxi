@@ -22,7 +22,7 @@
 #define OUTPUT_COLLISION_BLENDER	0
 #define OUTPUT_MMB_BLENDER		0
 
-#define	WRITE_MMB_RGB		1
+#define	WRITE_MMB_RGB		0
 
 CDatLoader::CDatLoader(void)
 {
@@ -255,7 +255,7 @@ void CDatLoader::extractMZB(char *p, unsigned int len, unsigned int count, bool 
 	memcpy(buf,mzbh1->id,4);
 	buf[4]=0x00;
 //	ofs << "id: " << mzbh1->id[0] << mzbh1->id[1] << mzbh1->id[2] << mzbh1->id[3] << " Total100: " << mzbh1->totalRecord100 << " offset Collision: " << mzbh1->offsetHeader2 << " unk1: " << mzbh1->unk1 << " unk2: " << mzbh1->unk2 << " unk3: " << mzbh1->unk3 << " offsetEnd: " << mzbh1->offsetEnd << " unk4: " << mzbh1->unk4 << " unk5: " << mzbh1->unk5 << endl;
-	ofs << "id: " << buf << " Total100: " << mzbh1->totalRecord100 << " R100Flg: " << mzbh1->R100Flag << " offsetCollision: " << mzbh1->offsetHeader2 << " d: " << mzbh1->d1 << "," << mzbh1->d2 << "," << mzbh1->d3 << "," << mzbh1->d4 << " offsetCubetree: " << mzbh1->offsetCubetree << " offsetEndRecord100: " << mzbh1->offsetEndRecord100 << " offsetEndCubetree: " << mzbh1->offsetEndCubetree << " unk5: " << mzbh1->unk5 << endl;
+	ofs << "id: " << buf << " Total100: " << mzbh1->totalRecord100 << " R100Flg: " << mzbh1->R100Flag << " offsetCollision: " << mzbh1->offsetHeader2 << " d: " << mzbh1->d1 << "," << mzbh1->d2 << "," << mzbh1->d3 << "," << mzbh1->d4 << " offsetlooseTree: " << mzbh1->offsetlooseTree << " offsetEndRecord100: " << mzbh1->offsetEndRecord100 << " offsetEndlooseTree: " << mzbh1->offsetEndlooseTree << " unk5: " << mzbh1->unk5 << endl;
 	totalsize += sizeof(SMZBHeader);
 
 	SMZBBlock100 *oj=nullptr, ob;
@@ -357,26 +357,26 @@ void CDatLoader::extractMZB(char *p, unsigned int len, unsigned int count, bool 
 	ofs << "local offset B84,B100,B92: " << totalsize << endl;
 
 	int sizeSpecial=0,index;
-	bool haveCubeTree=false, haveSpecial=false, haveDatRef=false;
-	haveCubeTree = mzbh1->offsetCubetree > mzbh1->offsetEndRecord100 && mzbh1->offsetEndCubetree < mzbh1->offsetHeader2;
-	if(haveCubeTree) {
-		if(mzbh1->offsetCubetree-mzbh1->offsetEndRecord100 > 16) {
+	bool havelooseTree=false, haveSpecial=false, haveDatRef=false;
+	havelooseTree = mzbh1->offsetlooseTree > mzbh1->offsetEndRecord100 && mzbh1->offsetEndlooseTree < mzbh1->offsetHeader2;
+	if(havelooseTree) {
+		if(mzbh1->offsetlooseTree-mzbh1->offsetEndRecord100 > 16) {
 			haveSpecial=true;
 		}
 
-		if(mzbh1->offsetHeader2 - mzbh1->offsetEndCubetree > 16) {
+		if(mzbh1->offsetHeader2 - mzbh1->offsetEndlooseTree > 16) {
 			haveDatRef=true;
 		}
 	}
 	else {
-		if(mzbh1->offsetCubetree>0) {
-			sizeSpecial=mzbh1->offsetCubetree;
+		if(mzbh1->offsetlooseTree>0) {
+			sizeSpecial=mzbh1->offsetlooseTree;
 			haveSpecial=true;
 		}
 	}
-	//unknown data Between B100 - cubeTree
+	//Potential Visible Set
 	if( haveSpecial ) {
-		ofs << "offset: " << totalsize << ") Special" << endl;
+		ofs << "offset: " << totalsize << ") Potential Visible Set" << endl;
 		if(sizeSpecial==0) {
 			sizeSpecial = *(unsigned int*)(p+totalsize);
 				totalsize+=4;
@@ -407,14 +407,14 @@ void CDatLoader::extractMZB(char *p, unsigned int len, unsigned int count, bool 
 			}
 			ofs << endl;		
 		}
-		ofs << "local offset unknown special: " << totalsize << endl;
+		ofs << "local offset unknown PVS: " << totalsize << endl;
 	}
 
-	//if mzbh1->Cubetree !=0, it point to an Cubetree???
-	if(haveCubeTree) {
-		totalsize = mzbh1->offsetCubetree;
-		ofs << "offset: " << totalsize << ")  Cubetree" << endl;
-		//24 float (min/max boundingRect - 8point), 8 int (MZBref + num + 6 face)
+	//if mzbh1->looseTree !=0, it point to an looseTree
+	if(havelooseTree) {
+		totalsize = mzbh1->offsetlooseTree;
+		ofs << "offset: " << totalsize << ")  looseTree" << endl;
+		//24 float (min/max boundingRect - 8point), 8 int (MZBref + num + 6 nextNode)
 		unsigned int totalMZB=0;
 		noj=1;		
 		SMZBBlock128 *pB128=nullptr;
@@ -434,15 +434,15 @@ void CDatLoader::extractMZB(char *p, unsigned int len, unsigned int count, bool 
 				ofs << "]" << endl;
 			}
 			totalsize += sizeof(SMZBBlock128);
-			if(totalsize > mzbh1->offsetEndCubetree)
+			if(totalsize > mzbh1->offsetEndlooseTree)
 				break;
 		} while(totalMZB < mzbh1->totalRecord100);
 
-		ofs << "Local offset cubeTree: " << totalsize << "  noRecord: " << (noj-1) << " total MZB ref: " << totalMZB << " total Rec100: " << mzbh1->totalRecord100 << endl;
+		ofs << "Local offset looseTree: " << totalsize << "  noRecord: " << (noj-1) << " total MZB ref: " << totalMZB << " total Rec100: " << mzbh1->totalRecord100 << endl;
 
 		//mzbReference
-		if(totalsize < mzbh1->offsetEndCubetree ) {
-			sizeSpecial = (mzbh1->offsetEndCubetree-totalsize)/4;
+		if(totalsize < mzbh1->offsetEndlooseTree ) {
+			sizeSpecial = (mzbh1->offsetEndlooseTree-totalsize)/4;
 			for(index=0; index<sizeSpecial; ++index) {
 				ofs << *(unsigned int*)(p+totalsize+index*4) << " ";
 				if( index!=0 && index % 10 == 0 )
@@ -453,10 +453,11 @@ void CDatLoader::extractMZB(char *p, unsigned int len, unsigned int count, bool 
 			ofs << "Local offset MZBref: " << (totalsize + index * 4) << endl;
 		}
 	}
-
+	char buf2[73];
+	buf2[72] = 0x00;
 	if(haveDatRef) {
 		buf[4]=0x00;
-		totalsize = mzbh1->offsetEndCubetree;
+		totalsize = mzbh1->offsetEndlooseTree;
 		SMZBBlock76 *pB76=nullptr;
 		ofs << "offset: " << totalsize << ") DatRef" << endl;
 		do {
@@ -466,13 +467,15 @@ void CDatLoader::extractMZB(char *p, unsigned int len, unsigned int count, bool 
 
 			memcpy(buf, pB76->datno, 4);
 			ofs << buf << endl;
+			memcpy(buf2, pB76->unk, 72);
+			ofs << buf2 << endl;
 			totalsize += sizeof(SMZBBlock76);
 		} while(totalsize < mzbh1->offsetHeader2);
 	}
 
 	ofs << "Local offset DatRef: " << totalsize << endl;
 
-	//unknown data betweeen endCubeTree to Collision [seems to be dat no]
+	//unknown data betweeen endlooseTree to Collision [seems to be dat no]
 	if( mzbh1->offsetHeader2==0 )
 		return;
 

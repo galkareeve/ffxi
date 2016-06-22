@@ -79,6 +79,7 @@
     <ClCompile Include="Frustum.cpp" />
     <ClCompile Include="IMesh.cpp" />
     <ClCompile Include="IMeshBuffer.cpp" />
+    <ClCompile Include="LooseTree.cpp" />
     <ClCompile Include="MeshBufferGroup.cpp" />
     <ClCompile Include="Octree.cpp" />
     <ClCompile Include="OpenGLDriver.cpp" />
@@ -108,6 +109,7 @@
     <ClInclude Include="ISceneNode.h" />
     <ClInclude Include="ISceneNodeAnimator.h" />
     <ClInclude Include="ISceneNodeAnimatorFinishing.h" />
+    <ClInclude Include="LooseTree.h" />
     <ClInclude Include="MeshBufferGroup.h" />
     <ClInclude Include="myEnum.h" />
     <ClInclude Include="Octree.h" />

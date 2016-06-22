@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include "myEnum.h"
 
 #define NUM_CHILDREN	8
 #define NUM_NEIGHBORS	6
@@ -12,12 +13,6 @@
 //	Types
 //
 
-typedef struct
-{
-	float x1,x2;
-	float y1,y2;
-	float z1,z2;
-} BoundingBox;
 
 typedef struct
 {
