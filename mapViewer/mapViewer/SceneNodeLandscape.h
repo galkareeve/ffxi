@@ -23,8 +23,8 @@ public:
 	void addMesh(IMesh *in);
 	IMesh* getMesh() { return (IMesh*)m_pMesh; }
 
-	float getCurrentFrame() { return m_curFrame; }
-	void setCurrentFrame(float frame);
+	int getCurrentFrame() { return m_curFrame; }
+	void setCurrentFrame(int frame);
 	void onAnimate(unsigned int timeMS);
 
 	void nextMMB();
@@ -41,6 +41,7 @@ public:
 	void toggleIsOctree();
 	void toggleDrawCube() { m_drawCube=!m_drawCube; }
 	void toggleDrawPVS();
+	void toggleDrawNormal();
 	bool isDrawPVS() { return m_drawPVS; }
 	int getCurrentPVS() { return m_curPVS; }
 	void nextPVS();
@@ -55,6 +56,7 @@ public:
 	void updateBoundingRect();
 	float getExtend();
 	void traverseNode(unsigned int addrID);
+	void populateNormal(IMeshBuffer *mb, int frame);
 
 protected:
 	void addColor2Cube( float per, BoundingBox &bbox, glm::vec3 &in);
@@ -64,7 +66,7 @@ protected:
 	CLooseTree *m_pLooseTree;
 
 	unsigned int m_lastTime;
-	float m_curFrame;
+	int m_curFrame;
 	int m_curMMB;
 	int m_curPVS;
 
@@ -73,10 +75,12 @@ protected:
 	bool m_drawCube;
 	bool m_isMMBModelInc;
 	bool m_drawPVS;
+	bool m_drawNormal;
 	int m_curMMBModel;	//draw individual model within each MMB
 
 	IMeshBuffer *m_pCubeMB;
 	IMeshBuffer *m_pFrustumMB;
+	IMeshBuffer *m_pNormalMB;
 
 	int m_lastCount;
 	std::vector<CMeshBufferGroup*> m_visibleMBG;

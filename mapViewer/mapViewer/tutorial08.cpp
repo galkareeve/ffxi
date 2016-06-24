@@ -294,6 +294,11 @@ int main( int argc, char** argv )
 				}
 			}
 		}
+		else if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+			if (glfwGetKey(window, GLFW_KEY_L) == GLFW_RELEASE) {
+				pnode->toggleDrawNormal();
+			}
+		}
 		else if(glfwGetKey( window, GLFW_KEY_KP_ADD ) == GLFW_PRESS){
 			if(glfwGetKey(window,GLFW_KEY_KP_ADD) == GLFW_RELEASE) {
 				pFrustum->setSpeedUp();

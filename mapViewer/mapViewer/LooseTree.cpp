@@ -13,6 +13,9 @@ CLooseTree::~CLooseTree()
 
 void CLooseTree::create(std::map<unsigned int, pLT_Node> &in)
 {
+	if (in.empty())
+		return;
+
 	m_mapLT_Node = in;
 	m_rootNodeID = in.begin()->second->addrID;
 }

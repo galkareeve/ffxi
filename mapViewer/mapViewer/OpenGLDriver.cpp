@@ -171,7 +171,7 @@ void COpenGLDriver::drawCube(int frame, IMeshBuffer *mb)
 	glBufferData(GL_ARRAY_BUFFER, mb->m_vecFrameBuffer[frame]->m_vecVertices.size() * sizeof(glm::vec3), &mb->m_vecFrameBuffer[frame]->m_vecVertices[0], GL_STATIC_DRAW);
 
 	//can store the color info in the normal array since it is not used!
-	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
 	glBufferData(GL_ARRAY_BUFFER, mb->m_vecFrameBuffer[frame]->m_vecNormal.size() * sizeof(glm::vec3), &mb->m_vecFrameBuffer[frame]->m_vecNormal[0], GL_STATIC_DRAW);
 
 	// 1rst attribute buffer : vertices
@@ -188,7 +188,7 @@ void COpenGLDriver::drawCube(int frame, IMeshBuffer *mb)
 
 	// 2nd attribute buffer : colors
 	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
 	glVertexAttribPointer(
 		1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
 		3,                                // size
@@ -222,8 +222,8 @@ void COpenGLDriver::draw(int frame, IMeshBuffer *mb, int multipler, int useAlpha
 	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
 	glBufferData(GL_ARRAY_BUFFER, mb->m_vecFrameBuffer[frame]->m_vecNormal.size() * sizeof(glm::vec3), &mb->m_vecFrameBuffer[frame]->m_vecNormal[0], GL_STATIC_DRAW);
 	
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, colorbuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mb->m_vecColor.size() * sizeof(glm::vec4), &mb->m_vecColor[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+	glBufferData(GL_ARRAY_BUFFER, mb->m_vecColor.size() * sizeof(glm::vec4), &mb->m_vecColor[0], GL_STATIC_DRAW);
 
 
 	// Bind our texture in Texture Unit 0

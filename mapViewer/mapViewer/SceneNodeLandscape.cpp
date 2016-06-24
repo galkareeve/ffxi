@@ -6,9 +6,15 @@
 #include <iostream>
 #include "Frustum.h"
 #include "LooseTree.h"
+#include <algorithm>
 
 //#define OCTREE
 #define LOOSETREE
+
+bool compareMZB(const void *a, const void *b)
+{
+	return(((CMeshBufferGroup*)a)->m_MZBIndex < ((CMeshBufferGroup*)b)->m_MZBIndex);
+}
 
 CSceneNodeLandscape::CSceneNodeLandscape(ISceneNode *parent, CSceneManager *mgr) : ISceneNode(parent,mgr)
 {
@@ -26,6 +32,7 @@ CSceneNodeLandscape::CSceneNodeLandscape(ISceneNode *parent, CSceneManager *mgr)
 	m_curMMBModel = 0;
 	m_curPVS = 0;
 	m_drawPVS = false;
+	m_drawNormal = false;
 }
 
 CSceneNodeLandscape::~CSceneNodeLandscape(void)
@@ -33,6 +40,8 @@ CSceneNodeLandscape::~CSceneNodeLandscape(void)
 	m_pMesh->drop();
 	delete m_pCubeMB;
 	delete m_pFrustumMB;
+	delete m_pNormalMB;
+
 #ifdef OCTREE
 	delete m_pOctree;
 #endif
@@ -67,6 +76,10 @@ void CSceneNodeLandscape::addMesh(IMesh *in)
 	m_pCubeMB->generateFrameBuffer(1);
 	m_pFrustumMB = new IMeshBuffer(E_LINE_LOOP);
 	m_pFrustumMB->generateFrameBuffer(4);	//left, right, top, bottom using LINE_LOOP
+
+	//for drawing normal
+	m_pNormalMB = new IMeshBuffer(E_LINE);
+	m_pNormalMB->generateFrameBuffer(1);
 }
 
 bool CSceneNodeLandscape::animate(int frame)
@@ -100,6 +113,9 @@ void CSceneNodeLandscape::draw(IDriver *dr, glm::mat4 &ProjectionMatrix, glm::ma
 void CSceneNodeLandscape::drawNonOctree(IDriver *dr )
 {
 	int bflg=0;
+	if (m_drawNormal)
+		m_pNormalMB->clear();
+
 	int i,gc = m_pMesh->getMeshBufferGroupCount(),count=0,mbc;
 	for(i=0; i<gc; ++i) {
 		CMeshBufferGroup *pMBG = m_pMesh->getMeshBufferGroup(i);
@@ -112,6 +128,9 @@ void CSceneNodeLandscape::drawNonOctree(IDriver *dr )
 				else
 					glBlendFunc(GL_ONE, GL_ZERO);
 				dr->draw(floor(m_curFrame), mb, mb->getMultipler(), mb->m_useAlpha);
+
+				if (m_drawNormal)
+					populateNormal(mb, m_curFrame);
 			}
 		}
 		count++;
@@ -127,7 +146,9 @@ void CSceneNodeLandscape::drawOctree(IDriver *dr )
 {
 	int bflg = 0;
 	int i,gc = m_visibleMBG.size(),count=0,mbc;
-
+	//sort the visibleMGB by MZBIndex
+	std::sort(m_visibleMBG.begin(), m_visibleMBG.end(),compareMZB);
+	
 	for(i=0; i<gc; ++i) {
 		CMeshBufferGroup *pMBG = m_visibleMBG[i];
 		if(!pMBG || pMBG->m_timeLastDrawn==m_lastTime)
@@ -163,10 +184,30 @@ void CSceneNodeLandscape::drawCube(IDriver *dr, glm::mat4 &MVP)
 		dr->drawCube(2, m_pFrustumMB);
 		dr->drawCube(3, m_pFrustumMB);
 	}
+	if (m_drawNormal)
+		dr->drawCube(0, m_pNormalMB);
+
 	dr->selectProgramID(0);
 }
 
-void CSceneNodeLandscape::setCurrentFrame(float frame)
+void CSceneNodeLandscape::populateNormal(IMeshBuffer *mb, int frame)
+{
+	//calculate normal by adding vertice + normal
+	int size = mb->m_vecFrameBuffer[frame]->m_vecVertices.size();
+	for (int i = 0; i < size; ++i) {
+		glm::vec3 v = mb->m_vecFrameBuffer[frame]->m_vecVertices[i];
+		glm::vec3 n = mb->m_vecFrameBuffer[frame]->m_vecNormal[i];
+
+		//every LINE is 2 point + 1 color, store in frame 0
+		m_pNormalMB->m_vecFrameBuffer[0]->m_vecVertices.push_back(v);
+		m_pNormalMB->m_vecFrameBuffer[0]->m_vecVertices.push_back(v+n*1.5f);
+		//cyan
+		m_pNormalMB->m_vecFrameBuffer[0]->m_vecNormal.push_back(glm::vec3(0.5f, 1.0f, 1.0f));
+		m_pNormalMB->m_vecFrameBuffer[0]->m_vecNormal.push_back(glm::vec3(0.5f, 1.0f, 1.0f));
+	}
+}
+
+void CSceneNodeLandscape::setCurrentFrame(int frame)
 {
 	m_curFrame=frame;
 }
@@ -190,7 +231,9 @@ void CSceneNodeLandscape::onAnimate(unsigned int timeMs)
 		//get frustum plane
 		m_SceneManager->populateFrustumPlane(m_pFrustumMB);
 	}
-
+	if (m_drawNormal) {
+		m_pNormalMB->clear();
+	}
 #ifdef OCTREE
 	//loop thru Octree and find the node within the frustum
 	std::vector<OCT_NODE*> vecOctNode;
@@ -214,8 +257,7 @@ void CSceneNodeLandscape::onAnimate(unsigned int timeMs)
 
 void CSceneNodeLandscape::traverseChild(std::vector<OCT_NODE*> &in, std::vector<int> &inIndex, int pos)
 {
-	int mbIndex=0,mzb;
-	CMeshBufferGroup *pMBG;
+	int mbIndex=0;
 	OCT_NODE *pnode = in[pos];
 	if(pnode->meshBufferIndexCount==0)
 		return;
@@ -277,7 +319,7 @@ void CSceneNodeLandscape::checkMBGInFrustum(int start, int count, std::vector<in
 			m_visibleMBG.push_back(pMBG);
 	}
 }
-
+//need to sort according to MZBIndex, so that transparent object are drawn last
 void CSceneNodeLandscape::traverseNode(unsigned int addrID)
 {
 	if (addrID == 0)
@@ -483,6 +525,7 @@ void CSceneNodeLandscape::toggleIsOctree()
 	if (m_isOctree) {
 		m_curMMB = -1;
 		m_isMZB = true;
+		m_drawNormal = false;
 		m_visibleMBG.clear();
 	}
 	else {
@@ -566,4 +609,14 @@ void CSceneNodeLandscape::prevPVS()
 
 	m_pMesh->refreshSpecialMeshBufferGroup(m_curPVS);
 //	updateBoundingRect();
+}
+
+void CSceneNodeLandscape::toggleDrawNormal()
+{
+	if (m_isOctree) {
+		std::cout << "Draw Normal only available when view MZB/MMB" << std::endl;
+		return;
+	}
+	m_drawNormal = !m_drawNormal;
+	std::cout << "Draw Normal: " << ((m_drawNormal) ? "on" : "off") << std::endl;
 }

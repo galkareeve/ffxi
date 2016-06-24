@@ -1463,10 +1463,6 @@ bool CFFXILandscapeMesh::lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in)
 	if(mmbIndex<0)
 		return false;
 
-//debug
-//	if (mmbIndex == 63)
-//		mmbIndex = 55;
-
 	CMMB *pmmb = nullptr;
 	if(mmbIndex < 1000 && mmbIndex<m_vecMMB.size())
 		pmmb = m_vecMMB[mmbIndex];
