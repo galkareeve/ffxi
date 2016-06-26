@@ -35,7 +35,7 @@ void CSceneNode::draw(IDriver *dr, glm::mat4 &ProjectionMatrix, glm::mat4 &ViewM
 	//generate the Model Matrix
 	glm::mat4 ModelMatrix = glm::mat4(1.0);
 //	ModelMatrix = glm::row(ModelMatrix, 3, glm::vec4(m_position,1));
-	ModelMatrix = glm::column(ModelMatrix, 3, glm::vec4(m_RelativeTranslation,1));
+	ModelMatrix = glm::column(ModelMatrix, 3, glm::vec4(m_Position,1));
 	glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 	dr->initProjectionMatrix(ModelMatrix, ViewMatrix, MVP);
 

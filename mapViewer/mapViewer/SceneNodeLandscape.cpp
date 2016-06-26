@@ -3,6 +3,8 @@
 #include "FFXILandscapeMesh.h"
 #include "IMeshBuffer.h"
 #include "MeshBufferGroup.h"
+#include "SceneNodeSky.h"
+
 #include <iostream>
 #include "Frustum.h"
 #include "LooseTree.h"
@@ -42,6 +44,11 @@ CSceneNodeLandscape::~CSceneNodeLandscape(void)
 	delete m_pFrustumMB;
 	delete m_pNormalMB;
 
+	for (auto it = m_Children.begin(); it != m_Children.end(); ++it) {
+		delete *it;
+	}
+	m_Children.clear();
+
 #ifdef OCTREE
 	delete m_pOctree;
 #endif
@@ -80,6 +87,12 @@ void CSceneNodeLandscape::addMesh(IMesh *in)
 	//for drawing normal
 	m_pNormalMB = new IMeshBuffer(E_LINE);
 	m_pNormalMB->generateFrameBuffer(1);
+
+	//create sky node if available
+	if (m_pMesh->haveCloud()) {
+		CSceneNodeSky *pNodeSky = new CSceneNodeSky(this, m_SceneManager);
+		pNodeSky->createSky(m_pMesh);
+	}
 }
 
 bool CSceneNodeLandscape::animate(int frame)
@@ -101,6 +114,10 @@ void CSceneNodeLandscape::draw(IDriver *dr, glm::mat4 &ProjectionMatrix, glm::ma
 		drawOctree(dr);
 		if(m_drawCube)
 			drawCube(dr, MVP);
+
+		for (auto it = m_Children.begin(); it != m_Children.end(); ++it) {
+			(*it)->draw(dr, ProjectionMatrix, ViewMatrix);
+		}
 	}
 	else {
 		drawNonOctree(dr);
@@ -253,6 +270,9 @@ void CSceneNodeLandscape::onAnimate(unsigned int timeMs)
 
 #endif
 
+	for (auto it = m_Children.begin(); it != m_Children.end(); ++it) {
+		(*it)->onAnimate(timeMs);
+	}
 }
 
 void CSceneNodeLandscape::traverseChild(std::vector<OCT_NODE*> &in, std::vector<int> &inIndex, int pos)

@@ -99,6 +99,8 @@ CFFXILandscapeMesh::CFFXILandscapeMesh(IDriver *in, unsigned int tid)
 	p_driver=in;
 	m_DefaultTextureID=tid;
 	m_isTransform=true;
+	m_haveCloud = false;
+	m_cloudMMBIndex=-1;
 }
 
 
@@ -313,20 +315,23 @@ bool CFFXILandscapeMesh::loadModelFile(std::string FN, CSceneManager *mgr)
 	char buf[255];
 	sprintf_s(buf,255,"MZB:%d MMB:%d IMG:%d BONE:%d ANIM:%d VERT:%d", MZBc,MMBc,IMGc,BONEc,ANIMc,VERTc);
 	std::cout << buf << std::endl;
-
-	if(!m_vecMZB.empty()) {
-		int mzbIndex=0;
+	int mzbIndex = 0;
+	CMeshBufferGroup *pMBG = nullptr;
+	if(!m_vecMZB.empty()) {		
 		std::cout << "Total B100: " << m_vecMZB.size() << std::endl;	
 		for(auto it=m_vecMZB.begin(); it!=m_vecMZB.end(); ++it, ++mzbIndex) {
-			length = findMMBIndex(&(*it));
-			if (!lookupMMB(mzbIndex, length, &(*it))) {
+			length = findMMBIndex((*it).id);
+			if (!(pMBG=lookupMMB(mzbIndex, length, &(*it)))) {
 				memcpy(buf, (*it).id, 16);
 				buf[16] = 0x00;
 				std::cout << "MMB not valid " << buf << std::endl;
 				tot_nv++;
 			}
-			else
+			else {
 				tot_v++;
+				//add the group
+				addMeshBufferGroup(pMBG);
+			}
 		}
 	}
 	std::cout << "Total Valid: " << tot_v << "  Total Invalid: " << tot_nv << std::endl;
@@ -346,6 +351,8 @@ void CFFXILandscapeMesh::refreshMeshBufferGroup(int i, bool isMZB)
 {
 	char buf[100];
 	int mmbIndex=0, mzbIndex=0, size=0;
+	CMeshBufferGroup *pMBG = nullptr;
+
 	SMZBBlock100 *b100;
 	for(auto it=m_meshBufferGroup.begin(); it!=m_meshBufferGroup.end(); ++it)
 		delete *it;
@@ -355,24 +362,28 @@ void CFFXILandscapeMesh::refreshMeshBufferGroup(int i, bool isMZB)
 		if(i!=-1) {
 			//only refresh ith record MZB, but each B100 record can have many meshBuffer (numModel)
 			b100 = &m_vecMZB[i];
-			mmbIndex = findMMBIndex(b100);
-			if(!lookupMMB( i, mmbIndex, b100 )) {
+			mmbIndex = findMMBIndex(b100->id);
+			if (!(pMBG = lookupMMB(i, mmbIndex, b100))) {
 				memcpy(buf, b100->id, 16);
-				buf[16]=0x00;
+				buf[16] = 0x00;
 				std::cout << "MZB not valid (" << i << ")   id: " << buf << std::endl;
 			}
+			else
+				addMeshBufferGroup(pMBG);
 		}
 		else {
 			//refresh all MZB
 			size=m_vecMZB.size();
 			for(int j=0; j<size; ++j) {
 				b100 = &m_vecMZB[j];
-				mmbIndex = findMMBIndex(b100);
-				if(!lookupMMB( j, mmbIndex, b100 )) {
+				mmbIndex = findMMBIndex(b100->id);
+				if (!(pMBG = lookupMMB(j, mmbIndex, b100))) {
 					memcpy(buf, b100->id, 16);
-					buf[16]=0x00;
+					buf[16] = 0x00;
 					std::cout << "MZB not valid (" << j << ")   id: " << buf << std::endl;
 				}
+				else
+					addMeshBufferGroup(pMBG);
 			}
 		}
 	}
@@ -384,9 +395,11 @@ void CFFXILandscapeMesh::refreshMeshBufferGroup(int i, bool isMZB)
 //		else
 //			b100 = nullptr;
 //		if(!lookupMMB(-1, i, b100)) {
-		if(!lookupMMB(-1, i, nullptr)) {
+		if (!(pMBG = lookupMMB(-1, i, nullptr))) {
 			std::cout << "MMB not valid (" << i << ")  " << std::endl;
 		}
+		else
+			addMeshBufferGroup(pMBG);
 	}
 }
 
@@ -396,6 +409,7 @@ void CFFXILandscapeMesh::refreshSpecialMeshBufferGroup(int i)
 	int mmbIndex = 0, size = 0;
 	SMZBBlock100 *b100;
 	SSpecial sp;
+	CMeshBufferGroup *pMBG = nullptr;
 
 	for (auto it = m_meshBufferGroup.begin(); it != m_meshBufferGroup.end(); ++it)
 		delete *it;
@@ -406,12 +420,14 @@ void CFFXILandscapeMesh::refreshSpecialMeshBufferGroup(int i)
 	size = sp.vecMZBref.size();
 	for (int j = 0; j<size; ++j) {
 		b100 = &m_vecMZB[sp.vecMZBref[j]];
-		mmbIndex = findMMBIndex(b100);
-		if (!lookupMMB(sp.vecMZBref[j], mmbIndex, b100)) {
+		mmbIndex = findMMBIndex(b100->id);
+		if (!(pMBG = lookupMMB(sp.vecMZBref[j], mmbIndex, b100))) {
 			memcpy(buf, b100->id, 16);
 			buf[16] = 0x00;
 			std::cout << "MZB not valid (" << sp.vecMZBref[j] << ")   id: " << buf << std::endl;
 		}
+		else
+			addMeshBufferGroup(pMBG);
 	}
 }
 
@@ -749,7 +765,7 @@ bool CFFXILandscapeMesh::decode_mzb(unsigned char* p, unsigned int maxLen)
 	return true;
 }
 
-void CFFXILandscapeMesh::extractMMB(char *p, unsigned int len, bool isDepend)
+void CFFXILandscapeMesh::extractMMB(char *p, unsigned int len)
 {
 	unsigned int totalsize=0,offset,maxRange;
 
@@ -838,7 +854,6 @@ void CFFXILandscapeMesh::extractMMB(char *p, unsigned int len, bool isDepend)
 			memcpy(mmblock.textureName, pMMBMH->textureName, 16);
 
 			//Vertex/Normal Info for each model
-//			pMMBMH->vertexsize &= 0xffff;
 			mmblock.numVertex = pMMBMH->vertexsize;
 			mmblock.blending = pMMBMH->blending;
 //debug
@@ -1003,10 +1018,12 @@ void CFFXILandscapeMesh::extractMMB(char *p, unsigned int len, bool isDepend)
 			pmmb->m_SMMBVertexIndices.push_back(mmblock);
 		}
 	}
-	if(!isDepend)
-		m_vecMMB.push_back(pmmb);
-	else
-		m_vecDependMMB.push_back(pmmb);
+	//Can be better
+	if (memcmp(pmmb->m_SMMBHeader.imgID, "clod", 4) == 0) {
+		m_haveCloud = true;
+		m_cloudMMBIndex = m_vecMMB.size();
+	}
+	m_vecMMB.push_back(pmmb);
 }
 
 //replace by getMZB100Matrix()
@@ -1046,6 +1063,19 @@ void CFFXILandscapeMesh::extractMMB(char *p, unsigned int len, bool isDepend)
 
 void CFFXILandscapeMesh::extractMZB(char *p, unsigned int len)
 {
+	int lastMZBIndex = m_vecMZB.size();
+	if (lastMZBIndex == 0) {
+		//create a root node to hold multiple looseTree (need to manual update its BBox)
+		m_rootLT = new LT_Node;
+		m_rootLT->addrID = 1;		//use ID 1, need to update the root node bbox
+		m_rootLT->noChild = 0;
+		m_rootLT->noMZB = 0;
+		m_rootLT->vecChild.clear();
+		m_rootLT->vecMZBref.clear();
+		m_rootLT->bbox.x1 = m_rootLT->bbox.y1 = m_rootLT->bbox.z1 = 100000;		//use a high value to ensure it will be overwritten
+		m_rootLT->bbox.x2 = m_rootLT->bbox.y2 = m_rootLT->bbox.z2 = -100000;
+		m_mapLT_Node.insert(pair<unsigned int, pLT_Node>(1, m_rootLT));
+	}
 	SMZBHeader *mzbh1 = (SMZBHeader*)p;
 //	mzbh1->totalRecord100 &=0xffffff;
 
@@ -1062,7 +1092,6 @@ void CFFXILandscapeMesh::extractMZB(char *p, unsigned int len)
 		b84 = (SMZBBlock84*)(p+32);
 
 		for(int i=0; i<noj; ++i ) {
-//			memcpy(&ob.id, b84->id, 16);
 			trimSpace(ob.id, b84->id, 16);
 			ob.fTransX=b84->fTransX;
 			ob.fTransY=b84->fTransY;
@@ -1102,7 +1131,6 @@ void CFFXILandscapeMesh::extractMZB(char *p, unsigned int len)
 	else if( (noj*sizeof(SMZBBlock92b)+sizeof(SMZBHeader))==mzbh1->offsetEndRecord100 ) {
 		b92 = (SMZBBlock92b*)(p+32);
 		for(int i=0; i<noj; ++i ) {
-//			memcpy(&ob.id, b92->id, 16);
 			trimSpace(ob.id, b92->id, 16);
 			ob.fTransX=b92->fTransX;
 			ob.fTransY=b92->fTransY;
@@ -1138,7 +1166,7 @@ void CFFXILandscapeMesh::extractMZB(char *p, unsigned int len)
 	SSpecial sp;
 	int sizePVS = 0, index;
 	bool havelooseTree = false, havePVS = false;
-	havelooseTree = mzbh1->offsetlooseTree > mzbh1->offsetEndRecord100 && mzbh1->offsetEndlooseTree < mzbh1->offsetHeader2;
+	havelooseTree = mzbh1->offsetlooseTree > mzbh1->offsetEndRecord100 && mzbh1->offsetEndlooseTree > mzbh1->offsetlooseTree;
 	unsigned int totalsize,val;
 
 	if (havelooseTree) {
@@ -1170,8 +1198,8 @@ void CFFXILandscapeMesh::extractMZB(char *p, unsigned int len)
 			for (int i = 1; i <= sp.size; ++i) {
 				val = *(unsigned int*)(p + totalsize);
 				totalsize += 4;
-
-				sp.vecMZBref.push_back(val);
+				//incr val when there is multiple MZB
+				sp.vecMZBref.push_back(lastMZBIndex + val);
 				if (totalsize >= mzbh1->offsetHeader2)
 					break;
 			}
@@ -1182,7 +1210,7 @@ void CFFXILandscapeMesh::extractMZB(char *p, unsigned int len)
 	if (havelooseTree) {
 		totalsize = mzbh1->offsetlooseTree;
 		//24 float (min/max boundingRect - 8point), 8 int (MZBref + num + 6 nextNode)
-		unsigned int totalMZB = 0;
+		unsigned int totalMZB = 0, noLT=0;
 		SMZBBlock128 *pB128 = nullptr;
 		do {
 			pB128 = (SMZBBlock128*)(p + totalsize);
@@ -1270,9 +1298,30 @@ void CFFXILandscapeMesh::extractMZB(char *p, unsigned int len)
 				totalMZB += pB128->numMZB;
 				//MZB index
 				for (int j = 0; j<pB128->numMZB; ++j) {
-					pLT->vecMZBref.push_back( *(unsigned int*)(p + pB128->offsetMZB + j * 4));
+					pLT->vecMZBref.push_back( *(unsigned int*)(p + pB128->offsetMZB + j * 4) + lastMZBIndex);
 				}
 			}
+			if (noLT == 0) {
+				//add to root node
+				m_rootLT->noChild++;
+				m_rootLT->vecChild.push_back(pLT->addrID);
+				//min
+				if (m_rootLT->bbox.x1 > pLT->bbox.x1)
+					m_rootLT->bbox.x1 = pLT->bbox.x1;
+				if (m_rootLT->bbox.y1 > pLT->bbox.y1)
+					m_rootLT->bbox.y1 = pLT->bbox.y1;
+				if (m_rootLT->bbox.z1 > pLT->bbox.z1)
+					m_rootLT->bbox.z1 = pLT->bbox.z1;
+				//max
+				if (m_rootLT->bbox.x2 < pLT->bbox.x2)
+					m_rootLT->bbox.x2 = pLT->bbox.x2;
+				if (m_rootLT->bbox.y2 < pLT->bbox.y2)
+					m_rootLT->bbox.y2 = pLT->bbox.y2;
+				if (m_rootLT->bbox.z2 < pLT->bbox.z2)
+					m_rootLT->bbox.z2 = pLT->bbox.z2;
+			}
+			noLT++;
+
 			//add record to map
 			m_mapLT_Node.insert(pair<unsigned int, pLT_Node>(pLT->addrID, pLT));
 
@@ -1388,23 +1437,25 @@ int CFFXILandscapeMesh::findMZBIndex(char *id)
 	return -1;
 }
 
-int CFFXILandscapeMesh::findMMBIndex(SMZBBlock100 *in)
+int CFFXILandscapeMesh::findMMBIndex(char *id)
 {
-	int i=0;
-	for(auto it = m_vecMMB.begin(); it!=m_vecMMB.end(); ++it,++i) {
+	//search backward, because there might be duplicate ID
+	int i=m_vecMMB.size()-1;
+	auto it = m_vecMMB.rbegin();
+	for (; it != m_vecMMB.rend(); ++it, --i) {
 		//id/imgID is not null-terminated
-		if(memcmp(in->id, (*it)->m_SMMBHeader.imgID,16)==0) {
+		if(memcmp(id, (*it)->m_SMMBHeader.imgID,16)==0) {
 			return i;
 		}
 	}
 
 	//check dependent MMB
-	i=0;
-	for(auto it = m_vecDependMMB.begin(); it!=m_vecDependMMB.end(); ++it, ++i) {
-		if(memcmp(in->id, (*it)->m_SMMBHeader.imgID,16)==0) {
-			return i+1000;
-		}
-	}
+	//i=0;
+	//for(auto it = m_vecDependMMB.begin(); it!=m_vecDependMMB.end(); ++it, ++i) {
+	//	if(memcmp(in->id, (*it)->m_SMMBHeader.imgID,16)==0) {
+	//		return i+1000;
+	//	}
+	//}
 	return -1;
 }
 
@@ -1447,7 +1498,7 @@ void CFFXILandscapeMesh::getMZB100Matrix(SMZBBlock100 *b84, glm::mat4 &out)
 	out[3]=col4;
 }
 
-bool CFFXILandscapeMesh::lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in)
+CMeshBufferGroup* CFFXILandscapeMesh::lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in)
 {
 	glm::vec3 min,max,tmp, br1,br2,br3,br4,br5,br6;
 	glm::vec3 v,n;
@@ -1461,7 +1512,12 @@ bool CFFXILandscapeMesh::lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in)
 
 	SMMBBlockVertex2 smmbv;
 	if(mmbIndex<0)
-		return false;
+		return nullptr;
+
+	//fix ID
+	if (in!=nullptr && needFix(mmbIndex, in->id)) {
+		std::cout << "change mzb: " << mzbIndex << "  mmbIndex: " << mmbIndex << std::endl;
+	}
 
 	CMMB *pmmb = nullptr;
 	if(mmbIndex < 1000 && mmbIndex<m_vecMMB.size())
@@ -1469,7 +1525,7 @@ bool CFFXILandscapeMesh::lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in)
 	else if(mmbIndex >=1000 && (mmbIndex-1000) < m_vecDependMMB.size())
 		pmmb = m_vecDependMMB[mmbIndex-1000];
 	else
-		return false;
+		return nullptr;
 
 	char buf[20];
 	memcpy(buf, pmmb->m_SMMBHeader.imgID,16);
@@ -1724,9 +1780,7 @@ bool CFFXILandscapeMesh::lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in)
 		mb->updateIndicesBuffer((*modelit).vecIndices);
 		pMBG->addMeshBuffer(mb);
 	}
-	//add the group
-	addMeshBufferGroup(pMBG);
-	return true;
+	return pMBG;
 }
 
 void CFFXILandscapeMesh::decodeMesh(char *p, unsigned int offsetB112, unsigned int offsetB92, IMeshBuffer *mb)
@@ -1884,3 +1938,38 @@ bool CFFXILandscapeMesh::in_frustum(mat4 M, vec3 p) {
                Pclip.z < Pclip.w;
 }
 
+bool CFFXILandscapeMesh::needFix(int &mmb, char *id)
+{
+	if (mmb <= 0)
+		return false;
+
+	char name[16];
+	memcpy(name, id, 16);
+	int i,index;
+	for (i = 15; i >1; --i) {
+		if (name[i] != 0x20) {
+			if (name[i] == 'm' && name[i - 1] == '_') {
+				name[i] = 'h';
+				index=findMMBIndex(name);
+				if (index != -1) {
+					mmb = index;
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+	return false;
+}
+
+CMeshBufferGroup* CFFXILandscapeMesh::generateCloudMeshBuffer()
+{
+	SMZBBlock100 b100;
+	//Crude, but doable
+	b100.fTransX = b100.fTransY = b100.fTransZ = 0.0f;
+	b100.fRotX = b100.fRotY = b100.fRotZ = 0.0f;
+	b100.fScaleX = b100.fScaleY = b100.fScaleZ = 6.0f;
+
+	CMeshBufferGroup *pMBG = lookupMMB(-1, m_cloudMMBIndex, &b100);
+	return pMBG;
+}

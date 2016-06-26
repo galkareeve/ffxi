@@ -326,6 +326,10 @@ public:
 
 	void getLooseTree( std::map<unsigned int, pLT_Node> &out) { out = m_mapLT_Node; };
 	int getPVSCount() { return m_vecPVS.size(); };
+	bool needFix(int &mmb, char *id);
+	bool haveCloud() { return m_haveCloud; };
+	int getCloudMMBIndex() { return m_cloudMMBIndex; };
+	CMeshBufferGroup* generateCloudMeshBuffer();
 
 private:
 	IDriver *p_driver;
@@ -336,11 +340,15 @@ private:
 	std::vector<CMeshBufferGroup*> m_meshBufferGroup;
 	std::vector<SLandscapeTextureInfo> m_vectextureInfo;
 
+	pLT_Node m_rootLT;
 	std::vector<SMZBBlock100> m_vecMZB;
 	std::vector<CMMB*> m_vecMMB;
 	std::vector<CMMB*> m_vecDependMMB;
 	std::map<unsigned int, pLT_Node> m_mapLT_Node;
 	std::vector<SSpecial> m_vecPVS;
+
+	bool m_haveCloud;
+	int m_cloudMMBIndex;
 
 	//MZB extraction
 	unsigned int m_lastIndices;
@@ -348,12 +356,12 @@ private:
 	void decode_mmb(unsigned char*p);
 	bool decode_mzb(unsigned char* p, unsigned int maxLen);
 
-	void extractMMB(char *p, unsigned int len, bool isDepend=false);
+	void extractMMB(char *p, unsigned int len);
 	void extractMZB(char *p, unsigned int len);
 	
 	int findMZBIndex(char *id);
-	int findMMBIndex(SMZBBlock100 *in);
-	bool lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in);
+	int findMMBIndex(char *id);
+	CMeshBufferGroup* lookupMMB(int mzbIndex, int mmbIndex, SMZBBlock100 *in);
 //	bool lookupMMB(SMZBBlock100 *in);
 //	void MMBTransform(SMZBBlock100 *b84, glm::vec3 &v);
 	void decodeMesh(char *p, unsigned int offsetB112, unsigned int offsetB92, IMeshBuffer *mb);

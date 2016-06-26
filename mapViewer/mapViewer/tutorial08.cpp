@@ -108,18 +108,14 @@ int main( int argc, char** argv )
 	GLuint programID = LoadShaders( "simpleShader.vertexshader", "simpleShader.fragmentshader" );
 	GLuint programIDcube = LoadShaders( "cubeShader.vertexshader", "cubeShader.fragmentshader" );
 
-	GLuint tid = loadBMP_custom("checker.bmp");
-	// Get a handle for our "MVP" uniform
-//	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
-//	GLuint ViewMatrixID = glGetUniformLocation(programID, "V");
-//	GLuint ModelMatrixID = glGetUniformLocation(programID, "M");
+//	GLuint tid = loadBMP_custom("checker.bmp");
+	GLuint tid = loadBMP_custom("black.bmp");
 
 	//create driver and sceneManager
 	COpenGLDriver *pDriver = new COpenGLDriver;
 	pDriver->setProgramID(programID, programIDcube);
 	pDriver->createMatrixHandler();
 	pFrustum = new CFrustum;
-//	pFrustum->setCamInternals(45.0f, 4.0f / 3.0f, 0.1f, 500.0f);
 	pFrustum->setCamInternals(60.0f, 1.0f*screenWidth/ screenHeight, 1.0f, 1000.0f);
 
 	CSceneManager *pSceneMgr = new CSceneManager;
@@ -127,7 +123,6 @@ int main( int argc, char** argv )
 	pSceneMgr->addFrustum(pFrustum);
 
 	int mapNo = atoi(argc >= 2 ? argv[1]:"4000010");
-	//onLoad mesh, it generate all the animation vertices/normals
 	CFFXILandscapeMesh *pFFXLandscapeImesh = (CFFXILandscapeMesh*)pSceneMgr->loadMeshLandscape(argc >= 2 ? argv[1] : "4000010", tid);
 	if(!pFFXLandscapeImesh)
 		return 2;
@@ -165,8 +160,6 @@ int main( int argc, char** argv )
 //	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ZERO);
-//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	char title[100];
 	int lastFPS=0, count=0, isFocus=GL_TRUE;
 

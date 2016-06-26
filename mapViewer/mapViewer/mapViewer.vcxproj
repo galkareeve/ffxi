@@ -87,6 +87,7 @@
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SceneNode.cpp" />
     <ClCompile Include="SceneNodeLandscape.cpp" />
+    <ClCompile Include="SceneNodeSky.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="Timer.cpp" />
@@ -118,6 +119,7 @@
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SceneNode.h" />
     <ClInclude Include="SceneNodeLandscape.h" />
+    <ClInclude Include="SceneNodeSky.h" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="TDWAnalysis.h" />
     <ClInclude Include="texture.hpp" />
