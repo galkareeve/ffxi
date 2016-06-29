@@ -61,7 +61,8 @@ void CFrustum::setCamInternals(float angle, float ratio, float nearD, float farD
 	tang = (float)tan(ANG2RAD * angle * 0.5) ;
 	nh = nearD * tang;
 	nw = nh * ratio; 
-	fh = farD  * tang;
+//	fh = farD  * tang;
+	fh = 1000.0f * tang;		//cap the culling @ 1000.f
 	fw = fh * ratio;
 }
 
@@ -81,7 +82,8 @@ void CFrustum::setCamDef(glm::vec3 &p, glm::vec3 &l, glm::vec3 &u)
 	Y = glm::cross(Z, X);
 
 	nc = p - Z * nearD;
-	fc = p - Z * farD;
+//	fc = p - Z * farD;
+	fc = p - Z * 1000.0f;
 
 	ntl = nc + Y * nh - X * nw;
 	ntr = nc + Y * nh + X * nw;

@@ -116,7 +116,7 @@ int main( int argc, char** argv )
 	pDriver->setProgramID(programID, programIDcube);
 	pDriver->createMatrixHandler();
 	pFrustum = new CFrustum;
-	pFrustum->setCamInternals(60.0f, 1.0f*screenWidth/ screenHeight, 1.0f, 1000.0f);
+	pFrustum->setCamInternals(60.0f, 1.0f*screenWidth/ screenHeight, 1.0f, 1600.0f);
 
 	CSceneManager *pSceneMgr = new CSceneManager;
 	pSceneMgr->addDriver(pDriver);

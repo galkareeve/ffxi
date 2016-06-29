@@ -94,10 +94,11 @@ unsigned int COpenGLDriver::createTexture(glm::u32 width, glm::u32 height, glm::
 
 	// "Bind" the newly created texture : all future texture functions will modify this texture
 	glBindTexture(GL_TEXTURE_2D, textureID);
-//	glPixelStorei(GL_UNPACK_ALIGNMENT,1);	
+	glPixelStorei(GL_UNPACK_ALIGNMENT,1);	
 	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	//GL_CLAMP_TO_EDGE will strecth the last pixel of the texture to fill the polygon
@@ -107,6 +108,9 @@ unsigned int COpenGLDriver::createTexture(glm::u32 width, glm::u32 height, glm::
 
 	//the last 3 param describe how the image is represented in memory (DDS2BMP conversion)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pImg);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 	return textureID;
 }
 
@@ -139,7 +143,14 @@ unsigned int COpenGLDriver::createDDSTexture(int type, glm::u32 width, glm::u32 
 	glGenTextures(1, &textureID);
 
 	// "Bind" the newly created texture : all future texture functions will modify this texture
-	glBindTexture(GL_TEXTURE_2D, textureID);	
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	//glEnable(GL_TEXTURE_2D);
+	//glTexStorage2D(GL_TEXTURE_2D, mipMapCount, GL_RGBA8, width, height);
+	//glCompressedTexImage2D(GL_TEXTURE_2D, 0, li->internalFormat, x, y, 0, size, (GLvoid*)pImg);
+	//glGenerateMipmap(GL_TEXTURE_2D);  //Generate num_mipmaps number of mipmaps here.
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -149,6 +160,7 @@ unsigned int COpenGLDriver::createDDSTexture(int type, glm::u32 width, glm::u32 
 
 	for (unsigned int ix = 0; ix < mipMapCount; ++ix) {
 		glCompressedTexImage2D(GL_TEXTURE_2D, ix, li->internalFormat, x, y, 0, size, (GLvoid*)pImg);
+		//this only work if the mipmap is already store in the dat
 		x = (x + 1) >> 1;
 		y = (y + 1) >> 1;
 		size = max(li->divSize, x) / li->divSize * max(li->divSize, y) / li->divSize * li->blockBytes;

@@ -290,9 +290,7 @@ bool CFFXILandscapeMesh::loadModelFile(std::string FN, CSceneManager *mgr)
 			break;
 			case 0x20:  //IMG	
 					tf = extractImageName(p+sizeof(DATHEAD), width, height, ppImage);
-//					tf.id=p_driver->createTexture(width,height,1,ppImage);
 					m_vectextureInfo.push_back(tf);
-//					delete ppImage;
 					IMGc++;
 			break;
 			case 0x29:	//Bone
@@ -440,7 +438,6 @@ SLandscapeTextureInfo CFFXILandscapeMesh::extractImageName(char *p, glm::u32 &wi
 {
 	char buf[50];
 	int len;
-//	std::string imgname;
 	char *bytePtr;
 	unsigned char *pPalett;
 	IMGINFOB1 *ib = nullptr;
@@ -459,7 +456,6 @@ SLandscapeTextureInfo CFFXILandscapeMesh::extractImageName(char *p, glm::u32 &wi
 	//copy name
 	memcpy(buf, ii->id, 16);
 	buf[16]=0x00;
-//	imgname.assign(buf);
 	tf.name.assign(buf);
 
 	switch( ii->flg )
@@ -467,9 +463,10 @@ SLandscapeTextureInfo CFFXILandscapeMesh::extractImageName(char *p, glm::u32 &wi
 	case 0xA1:	pDDSBlock = new u8[ii->size];
 				memset(pDDSBlock, 0, ii->size);
 				memcpy(pDDSBlock, p+sizeof(IMGINFOA1), ii->size);
-//				ddsbmp.convert2BMP(pDDSBlock, width, height, ii->size, ii->widthbyte, ii->ddsType[0], NULL, ppImage);
-				tf.id = p_driver->createDDSTexture(atoi(&ii->ddsType[0]), width, height, 1, pDDSBlock);
-			
+//				tf.id = p_driver->createDDSTexture(atoi(&ii->ddsType[0]), width, height, 1, pDDSBlock);
+				ddsbmp.convert2BMP(pDDSBlock, width, height, ii->size, ii->widthbyte, ii->ddsType[0], NULL, ppImage);
+				tf.id = p_driver->createTexture(width, height, 1, ppImage);
+				delete[] ppImage;
 				delete[] pDDSBlock;
 	break;
 			
@@ -1968,7 +1965,7 @@ CMeshBufferGroup* CFFXILandscapeMesh::generateCloudMeshBuffer()
 	//Crude, but doable
 	b100.fTransX = b100.fTransY = b100.fTransZ = 0.0f;
 	b100.fRotX = b100.fRotY = b100.fRotZ = 0.0f;
-	b100.fScaleX = b100.fScaleY = b100.fScaleZ = 6.0f;
+	b100.fScaleX = b100.fScaleY = b100.fScaleZ = 8.0f;
 
 	CMeshBufferGroup *pMBG = lookupMMB(-1, m_cloudMMBIndex, &b100);
 	return pMBG;
