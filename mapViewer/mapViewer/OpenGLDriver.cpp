@@ -57,10 +57,11 @@ COpenGLDriver::~COpenGLDriver(void)
 {
 }
 
-void COpenGLDriver::setProgramID( GLuint pid, GLuint pidcube )
+void COpenGLDriver::setProgramID( GLuint pid, GLuint pidcube, GLuint pidsky )
 {
 	m_programID = pid;
 	m_programIDcube = pidcube;
+	m_programIDSky = pidsky;
 }
 
 void COpenGLDriver::toggleWireframe()
@@ -77,8 +78,12 @@ GLuint COpenGLDriver::selectProgramID( int s)
 		glUseProgram(m_programIDcube);
 		return m_programIDcube;
 	}
-	else
-		glUseProgram(m_programID);
+	else if (s == 2) {
+		glUseProgram(m_programIDSky);
+		return m_programIDSky;
+	}
+	
+	glUseProgram(m_programID);
 	return m_programID;
 }
 
@@ -352,6 +357,7 @@ void COpenGLDriver::cleanUp()
 	glDeleteBuffers(1, &colorbuffer);
 	glDeleteProgram(m_programID);
 	glDeleteProgram(m_programIDcube);
+	glDeleteProgram(m_programIDSky);
 }
 
 void COpenGLDriver::initProjectionMatrix(glm::mat4 &ModelMatrix, glm::mat4 &ViewMatrix, glm::mat4 &MVP)

@@ -14,7 +14,7 @@ public:
 	void deleteTexture(unsigned int tid);
 	void draw(int frame, IMeshBuffer *mb, int bflg, int useAlpha = 0);
 	void drawCube(int frame, IMeshBuffer *mb);
-	void setProgramID( GLuint pid, GLuint pidcube );
+	void setProgramID( GLuint pid, GLuint pidcube, GLuint pidSky );
 	GLuint selectProgramID( int s);
 	void setShaderTextureID(GLuint sid);
 	void assignGLBufferID(GLuint vb, GLuint uv, GLuint nor, GLuint col);
@@ -27,7 +27,7 @@ public:
 	bool isWireframe() { return m_isWireframe; }
 
 protected:
-	GLuint m_programID, m_programIDcube;
+	GLuint m_programID, m_programIDcube, m_programIDSky;
 	GLuint m_shaderTextureID;
 	GLuint vertexbuffer;
 	GLuint uvbuffer;

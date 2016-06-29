@@ -84,6 +84,7 @@ int main( int argc, char** argv )
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 	glfwSetCursorPos(window, screenWidth /2, screenHeight /2);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
 	// Dark blue background
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -107,13 +108,14 @@ int main( int argc, char** argv )
 //	GLuint programID = LoadShaders( "StandardShading.vertexshader", "StandardShading.fragmentshader" );
 	GLuint programID = LoadShaders( "simpleShader.vertexshader", "simpleShader.fragmentshader" );
 	GLuint programIDcube = LoadShaders( "cubeShader.vertexshader", "cubeShader.fragmentshader" );
+	GLuint programIDSky = LoadShaders("skyShader.vertexshader", "skyShader.fragmentshader");
 
 //	GLuint tid = loadBMP_custom("checker.bmp");
 	GLuint tid = loadBMP_custom("black.bmp");
 
 	//create driver and sceneManager
 	COpenGLDriver *pDriver = new COpenGLDriver;
-	pDriver->setProgramID(programID, programIDcube);
+	pDriver->setProgramID(programID, programIDcube, programIDSky);
 	pDriver->createMatrixHandler();
 	pFrustum = new CFrustum;
 	pFrustum->setCamInternals(60.0f, 1.0f*screenWidth/ screenHeight, 1.0f, 1600.0f);

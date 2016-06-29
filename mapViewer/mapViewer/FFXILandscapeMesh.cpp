@@ -1963,10 +1963,11 @@ CMeshBufferGroup* CFFXILandscapeMesh::generateCloudMeshBuffer()
 {
 	SMZBBlock100 b100;
 	//Crude, but doable
-	b100.fTransX = b100.fTransY = b100.fTransZ = 0.0f;
+	b100.fTransX = b100.fTransZ = 0.0f;
+	b100.fTransY = 50.f;	//positive is down
 	b100.fRotX = b100.fRotY = b100.fRotZ = 0.0f;
-	b100.fScaleX = b100.fScaleY = b100.fScaleZ = 8.0f;
-
+	b100.fScaleX = b100.fScaleY = b100.fScaleZ = 4.0f;
+	
 	CMeshBufferGroup *pMBG = lookupMMB(-1, m_cloudMMBIndex, &b100);
 	return pMBG;
 }
